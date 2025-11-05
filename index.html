@@ -3,483 +3,1550 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Triangulation: Findings & Conclusions</title>
-    <!-- Load Tailwind CSS -->
-    <script src="https://cdn.tailwindcss.com"></script>
+    <title>CPE Document Triangulation</title>
     <style>
-        /* Use Inter font */
+        :root {
+            --primary-color: #2c3e50;
+            --secondary-color: #3498db;
+            --accent-color: #e74c3c;
+            --light-color: #ecf0f1;
+            --dark-color: #34495e;
+            --success-color: #27ae60;
+            --warning-color: #f39c12;
+            --conclusion-color: #3498db;
+            --recommendation-color: #27ae60;
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
         body {
-            font-family: 'Inter', sans-serif;
-        }
-        /* Simple transition for accordion icon */
-        .accordion-icon {
-            transition: transform 0.3s ease-out;
-        }
-        .rotate-180 {
-            transform: rotate(180deg);
+            background-color: #f5f7fa;
+            color: #333;
+            line-height: 1.6;
         }
         
-        /* Custom styles for accordion content for smooth open/close */
-        .accordion-content {
-            max-height: 0;
+        header {
+            background: linear-gradient(135deg, var(--primary-color), var(--dark-color));
+            color: white;
+            padding: 2rem 1rem;
+            text-align: center;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+        
+        header h1 {
+            font-size: 2.2rem;
+            margin-bottom: 0.5rem;
+        }
+        
+        header p {
+            font-size: 1.1rem;
+            max-width: 800px;
+            margin: 0 auto;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 2rem auto;
+            padding: 0 1rem;
+        }
+        
+        .filter-section {
+            background-color: white;
+            padding: 1.5rem;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+            margin-bottom: 2rem;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 1rem;
+            align-items: center;
+        }
+        
+        .filter-section label {
+            font-weight: 600;
+            color: var(--dark-color);
+        }
+        
+        .filter-section select {
+            padding: 0.5rem 1rem;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            background-color: white;
+            color: var(--dark-color);
+            font-size: 1rem;
+        }
+        
+        .search-box {
+            flex-grow: 1;
+            padding: 0.5rem 1rem;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 1rem;
+        }
+        
+        .stats {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+            flex-wrap: wrap;
+        }
+        
+        .stat-card {
+            background-color: white;
+            padding: 1rem 1.5rem;
+            border-radius: 8px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
+            flex: 1;
+            min-width: 200px;
+        }
+        
+        .stat-card.conclusions {
+            border-left: 4px solid var(--conclusion-color);
+        }
+        
+        .stat-card.recommendations {
+            border-left: 4px solid var(--recommendation-color);
+        }
+        
+        .stat-card.evidence {
+            border-left: 4px solid var(--warning-color);
+        }
+        
+        .stat-number {
+            font-size: 2rem;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+        }
+        
+        .stat-label {
+            font-size: 0.9rem;
+            color: #7f8c8d;
+        }
+        
+        .cards-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+            gap: 1.5rem;
+        }
+        
+        .card {
+            background-color: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
             overflow: hidden;
-            transition: max-height 0.3s ease-out, padding 0.3s ease-out;
-            padding-left: 1.5rem;
-            padding-right: 1.5rem;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
         }
         
-        .accordion-content.open {
-            max-height: 2000px; /* A large enough value to show content */
-            padding-top: 1.5rem;
-            padding-bottom: 1.5rem;
-            transition: max-height 0.5s ease-in, padding 0.5s ease-in;
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+        }
+        
+        .card-header {
+            padding: 1.2rem;
+            color: white;
+            font-weight: 600;
+        }
+        
+        .conclusion .card-header {
+            background-color: var(--conclusion-color);
+        }
+        
+        .recommendation .card-header {
+            background-color: var(--recommendation-color);
+        }
+        
+        .card-body {
+            padding: 1.2rem;
+        }
+        
+        .card-title {
+            font-size: 1.1rem;
+            font-weight: 600;
+            margin-bottom: 0.8rem;
+            color: var(--dark-color);
+        }
+        
+        .evidence-count {
+            display: inline-block;
+            background-color: var(--light-color);
+            color: var(--dark-color);
+            padding: 0.2rem 0.6rem;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            margin-bottom: 1rem;
+        }
+        
+        .evidence-list {
+            max-height: 200px;
+            overflow-y: auto;
+            padding-right: 0.5rem;
+        }
+        
+        .evidence-item {
+            padding: 0.8rem;
+            margin-bottom: 0.8rem;
+            background-color: #f8f9fa;
+            border-left: 3px solid var(--warning-color);
+            border-radius: 4px;
+        }
+        
+        .evidence-item:last-child {
+            margin-bottom: 0;
+        }
+        
+        .source {
+            font-size: 0.85rem;
+            color: #7f8c8d;
+            margin-top: 0.5rem;
+        }
+        
+        .view-all-btn {
+            display: block;
+            width: 100%;
+            padding: 0.8rem;
+            background-color: transparent;
+            border: 1px solid var(--secondary-color);
+            color: var(--secondary-color);
+            border-radius: 4px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-top: 1rem;
+            text-align: center;
+            text-decoration: none;
+        }
+        
+        .view-all-btn:hover {
+            background-color: var(--secondary-color);
+            color: white;
+        }
+        
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.7);
+            z-index: 1000;
+            overflow-y: auto;
+        }
+        
+        .modal-content {
+            background-color: white;
+            margin: 2rem auto;
+            padding: 2rem;
+            border-radius: 8px;
+            max-width: 900px;
+            width: 90%;
+            position: relative;
+        }
+        
+        .close-btn {
+            position: absolute;
+            top: 1rem;
+            right: 1.5rem;
+            font-size: 1.5rem;
+            cursor: pointer;
+            color: var(--dark-color);
+        }
+        
+        .modal-title {
+            font-size: 1.5rem;
+            margin-bottom: 1.5rem;
+            color: var(--primary-color);
+            border-bottom: 2px solid var(--light-color);
+            padding-bottom: 0.5rem;
+        }
+        
+        .modal-evidence-list {
+            margin-top: 1.5rem;
+        }
+        
+        .modal-evidence-item {
+            padding: 1rem;
+            margin-bottom: 1rem;
+            background-color: #f8f9fa;
+            border-radius: 6px;
+            border-left: 4px solid var(--warning-color);
+        }
+        
+        .modal-source {
+            font-size: 0.9rem;
+            color: #7f8c8d;
+            margin-top: 0.5rem;
+            font-style: italic;
+        }
+        
+        footer {
+            text-align: center;
+            padding: 2rem 1rem;
+            background-color: var(--dark-color);
+            color: white;
+            margin-top: 3rem;
+        }
+        
+        @media (max-width: 768px) {
+            .cards-container {
+                grid-template-columns: 1fr;
+            }
+            
+            .filter-section {
+                flex-direction: column;
+                align-items: stretch;
+            }
+            
+            .search-box {
+                width: 100%;
+            }
+            
+            .stats {
+                flex-direction: column;
+            }
         }
     </style>
-    <!-- Import Inter font -->
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 </head>
-<body class="bg-gray-100 text-gray-800">
-
-    <div class="container mx-auto p-4 md:p-8 max-w-6xl">
-        
-        <!-- Header -->
-        <header class="text-center mb-10">
-            <h1 class="text-3xl md:text-4xl font-bold text-blue-800">
-                Triangulation Visualization
-            </h1>
-            <p class="text-lg text-gray-600 mt-2">
-                Findings, Conclusions & Recommendations
-            </p>
-        </header>
-
-        <!-- Controls -->
-        <div class="flex justify-end space-x-3 mb-4">
-            <button id="expand-all" class="bg-blue-600 text-white px-4 py-2 rounded-lg shadow-sm hover:bg-blue-700 transition duration-150 text-sm font-medium">
-                Expand All
-            </button>
-            <button id="collapse-all" class="bg-gray-300 text-gray-800 px-4 py-2 rounded-lg shadow-sm hover:bg-gray-400 transition duration-150 text-sm font-medium">
-                Collapse All
-            </button>
-        </div>
-
-        <!-- Accordion Container -->
-        <div id="accordion-container" class="space-y-4">
-            <!-- Items will be injected by JavaScript -->
-            <div class="text-center text-gray-500 p-10">
-                Loading data...
+<body>
+    <header>
+        <h1>CPE Document Triangulation</h1>
+        <p>Connecting conclusions and recommendations with evidence from the Evaluation Matrix</p>
+    </header>
+    
+    <div class="container">
+        <div class="stats">
+            <div class="stat-card conclusions">
+                <div class="stat-number" id="conclusionsCount">12</div>
+                <div class="stat-label">Conclusions</div>
+            </div>
+            <div class="stat-card recommendations">
+                <div class="stat-number" id="recommendationsCount">11</div>
+                <div class="stat-label">Recommendations</div>
+            </div>
+            <div class="stat-card evidence">
+                <div class="stat-number" id="evidenceCount">178</div>
+                <div class="stat-label">Evidence Items</div>
             </div>
         </div>
         
-        <!-- Footer -->
-        <footer class="text-center text-gray-500 mt-12 text-sm">
-            Powered by an interactive web visualization.
-        </footer>
+        <div class="filter-section">
+            <label for="typeFilter">Filter by:</label>
+            <select id="typeFilter">
+                <option value="all">All Items</option>
+                <option value="conclusion">Conclusions Only</option>
+                <option value="recommendation">Recommendations Only</option>
+            </select>
+            
+            <label for="numberFilter">Item Number:</label>
+            <select id="numberFilter">
+                <option value="all">All Numbers</option>
+                <!-- Options will be populated by JavaScript -->
+            </select>
+            
+            <input type="text" class="search-box" id="searchInput" placeholder="Search in content...">
+        </div>
+        
+        <div class="cards-container" id="cardsContainer">
+            <!-- Cards will be populated by JavaScript -->
+        </div>
     </div>
+    
+    <div class="modal" id="detailModal">
+        <div class="modal-content">
+            <span class="close-btn" id="closeModal">&times;</span>
+            <h2 class="modal-title" id="modalTitle"></h2>
+            <div id="modalDescription"></div>
+            <div class="modal-evidence-list" id="modalEvidenceList"></div>
+        </div>
+    </div>
+    
+    <footer>
+        <p>CPE Document Triangulation Visualization</p>
+    </footer>
 
     <script>
-        // --- Raw Data from the Document ---
-        // We embed the raw text content here to be parsed by JavaScript.
-        const rawTextData = `
-"Conclusion / Recommendation (verbatim, from the CPE doc) ","Matched Finding / Evidence (verbatim, from the Evaluation Matrix) ","Source (filename, section/page/row if available) "
-"Conclusion 1. The current Programme achieved notable cross-area gains, such as the national Violence Against Women survey, stronger MISP preparedness, and improved quality standards. However, interlinkages between the four thematic Theories of Change were not explicit, and a structured, cross-area way of working was not fully established. Interlinkage among the TOCs could open up opportunities for more integrated programming, joint adaptation, cross-fertilization, innovation, monitoring, and the consistent application of equity considerations, mitigation of demographic and climate risks, and data governance. As a result, demonstrating combined contributions to outcomes and the three Transformative Results (3TRs) is more challenging. Joint UN programming and diversified partnerships added value in policy and delivery, especially in humanitarian settings. ","The 10th Country Programme did not include a single Theory of Change, but four thematic Theories of Change. This has not facilitated systemic inter-area work but has reinforced intra-area focus.","Evaluation Matrix based on findings.pdf, EQ2, Claim 2"
-,The absence of a unified (“umbrella”) ToC has limited system-wide adaptive responses and joint monitoring across areas—highlighting a cross-area coordination issue to address in management responses.,"Evaluation Matrix based on findings.pdf, EQ2, Claim 2"
-,"Lack of robust, documented cross-thematic integration in planning... integration is more ad hoc than systemic, particularly at sub-national levels.","Evaluation Matrix based on findings.pdf, EQ3, Claim 7"
-,"Operational collaboration is standard in the humanitarian response (Rohingya camps) but inconsistent outside crisis contexts and often project-specific, not a core operational norm.","Evaluation Matrix based on findings.pdf, EQ3, Claim 7; EQ2, Claim 2"
-,"Strategic platforms exist and facilitate dialogue, but budgetary/resource integration is weak; uneven resource distribution across thematic areas.","Evaluation Matrix based on findings.pdf, EQ2, Claim 2; EQ3, Claim 7"
-,"Over 38,000 women and girls were served at 92 police desks across 10 districts in 2023.","Evaluation Matrix based on findings.pdf, EQ3, Claim 4"
-,"In response to floods in Chattogram, UNFPA provided dignity kits, MHM kits, and baby kits to 12,000 women and 6,120 girls, including those with disabilities and transgender women.","Evaluation Matrix based on findings.pdf, EQ1, Claim 4"
-,"With UNFPA support, the Ministry of Health integrated the Minimum Initial Service Package (MISP) into the 5th Health Sector Operational Plan.","Evaluation Matrix based on findings.pdf, EQ1, Claim 6; EQ5, Claim 10.2"
-,UNFPA successfully supported the Census 2022 and VAW Survey 2024 to gather disaggregated data on marginalized populations. The Census 2022 included questions specifically targeting Persons with Disabilities (POD) and transgender populations.,"Evaluation Matrix based on findings.pdf, EQ1, Claim 5; EQ3, Claim 6; EQ4, Claim 1"
-,The Gender-based Violence Sub Sector and focal points developed a dashboard for real-time mapping and referral pathway sharing in refugee camps.,"Evaluation Matrix based on findings.pdf, EQ1, Claim 5; EQ3, Claim 3"
-,UNFPA actively participated in and co-chaired the UN SDG data group and the UNSDCF Monitoring and Evaluation (M&E) working group in 2022 and 2023.,"Evaluation Matrix based on findings.pdf, EQ2, Claim 1; EQ4, Claim 5"
-,"UNFPA led the GBV Sub-Sector, coordinating 67 partner organizations across 33 camps and 11 host communities to enhance interagency GBV case management and service coordination.","Evaluation Matrix based on findings.pdf, EQ4, Claim 5"
-,"UNFPA co-created a common beneficiary database with WFP, FAO, UNICEF, and Bangladesh Red Crescent Society for disaster response.","Evaluation Matrix based on findings.pdf, EQ1, Claim 6; EQ4, Claim 5"
-"Conclusion 2. The LNOB principle was intentionally pursued through targeted actions focusing on marginalized groups and vulnerable districts, delivering notable localized gains. However, despite progress in advocating with the MoHFW, national routine health data systems (specifically the Government Health MIS) often lacked consistent disaggregation for key LNOB dimensions (particularly disability), limiting the ability to rigorously verify equity results at scale. Integration of LNOB approaches varied across settings and partners due to uneven capacities, leading to inconsistent uptake of gender equality, disability inclusion, and youth participation. Humanitarian responses showed stronger coherence than non-emergency contexts. National evidence generation improved, but weak interoperability and gaps in administrative data continued to make it difficult to show how program benefits were distributed across different LNOB groups (e.g., disproportionate benefits to ethnic minorities versus persons with disabilities). ",The 10 priority districts for CP10 were selected through rigorous analysis by the M&E Unit of key indicators.,"Evaluation Matrix based on findings.pdf, EQ1, Claim 1"
-,"UNFPA selects low-performing districts, considering marginalized groups, remoteness, and disability, for targeted support in maternal and child health.","Evaluation Matrix based on findings.pdf, EQ1, Claim 1; EQ5, Claim 11.1"
-,"The strategic focus on low-performing districts and vulnerable groups (including those facing geographical, economic, or cultural barriers, and persons with disabilities) for targeted support is highly relevant to achieving lagging SDG goals and 'leaving no one behind' (LNOB).","Evaluation Matrix based on findings.pdf, EQ1, Claim 1"
-,"To ensure the Leave No One Behind (LNOB) approach, UNFPA deployed midwives to the most marginalised indigenous communities, such as the Santal in Gaibandha.","Evaluation Matrix based on findings.pdf, EQ1, Claim 1; EQ1, Claim 3"
-,"The UNFPA-supported Census 2022 included questions specifically targeting vulnerable and marginalized groups, such as Persons with Disabilities (POD) and transgender populations, to generate disaggregated data.","Evaluation Matrix based on findings.pdf, EQ1, Claim 3; EQ1, Claim 5; EQ3, Claim 3; EQ4, Claim 1"
-,"A significant and persistent data gap exists for disaggregated data, particularly concerning persons with disabilities, which remains largely unavailable within the national health information system (DHIS2).","Evaluation Matrix based on findings.pdf, EQ1, Claim 9; EQ1, Claim 12; EQ4, Claim 1; EQ4, Claim 3; EQ4, Claim 5; EQ6, Claim 6"
-,"Despite effective advocacy leading to the integration of some UNFPA priority indicators into the national health information system (DHIS2), a significant data gap persists, particularly concerning disaggregated data for persons with disabilities.","Evaluation Matrix based on findings.pdf, EQ3, Claim 3; EQ3, Claim 6; EQ4, Claim 1; EQ4, Claim 4"
-,"Visibility for indigenous peoples, persons with disabilities, and transgender/gender-diverse people remains inconsistent, suggesting that progress is challenging.","Evaluation Matrix based on findings.pdf, EQ1, Claim 11; EQ3, Claim 8; EQ4, Claim 3; EQ4, Claim 5"
-,"UNFPA IPs often collect sex, age, and disability data for reporting, but lack the capacity to use this information for adaptive programming or resource targeting.","Evaluation Matrix based on findings.pdf, EQ1, Claim 9; EQ3, Claim 8; EQ3, Claim 2; EQ3, Claim 5; EQ4, Claim 6; EQ6, Claim 5; EQ6, Claim 6"
-,"A significant gap was noted where nearly zero percentage of staff in Women Friendly Spaces (WFS) received dedicated training on disability inclusion, which limits the effective uptake of services by women with disabilities.","Evaluation Matrix based on findings.pdf, EQ1, Claim 10"
-,"With the existing data, it is not possible to determine whether the most marginalized and vulnerable groups benefited the most from UNFPA interventions.","Evaluation Matrix based on findings.pdf, EQ5, Claim 11.3"
-,"Application of LNOB principle, cross-cutting approaches and data disaggregation by vulnerabilities is widespread but not yet systematic everywhere, and current data are insufficient to verify that LNOB groups benefited most.","Evaluation Matrix based on findings.pdf, EQ5, Claim 11.6"
-,"LNOB and other cross-cutting approaches are embedded in SOPs, planning tools, and supervision and are applied in most development and humanitarian interventions; however, consistent operationalization for persons with disabilities and other marginalized populations remains uneven across districts.","Evaluation Matrix based on findings.pdf, EQ5, Claim 11.6"
-"Conclusion 3. Strong strategic alignment with national and global priorities underpinned UNFPA's normative role, successfully translating evidence into national policies and standards. However, the sustained uptake of these specific policies and standards in routine practice and their consistent inclusion in multi-year government budgets and spending remained uneven, limiting the national scale and long-term durability of the change. ","UNFPA programs are highly aligned with Bangladesh's national SDG goals, targets, and operational plans for health, child health, SRHR, and gender-based violence.","Evaluation Matrix based on findings.pdf, EQ1, Claim 8; EQ3, Claim 1; EQ2, Claim 1"
-,"The 10th Country Program (2022-2026) aims to contribute to the three transformative results (reduction of maternal mortality, unmet need for family planning, and gender-based violence/child marriage).","Evaluation Matrix based on findings.pdf, EQ1, Claim 1; EQ1, Claim 8"
-,CP (SRHR) is aligned with national policies including i) National Population Policy ; ii) 4th Health and Population and Nutrition Sector Program (HPNSP); iii) Government’s Commitment on FP2030; iv) 8th Five Year Pan ; v) 8th Five Year Plan ; vi) The UNDSCF and viii) The SDGs.,"Evaluation Matrix based on findings.pdf, EQ1, Claim 8; EQ3, Claim 4"
-,"UNFPA provided technical assistance to the Ministry of Health and Family Welfare (MoHFW) for updating the National Population Policy 2012, shifting its focus from population control to population management in line with SDGs, ICPD PoA, Perspective Plan (2041), and the Delta Plan (2100).","Evaluation Matrix based on findings.pdf, EQ3, Claim 4; EQ3, Claim 5; EQ3, Claim 1; EQ6, Claim 6.1"
-,The first ever Bangladesh National Family Planning Strategy (2023-2030) was formulated by the Ministry of Health and Family Welfare with support from UNFPA.,"Evaluation Matrix based on findings.pdf, EQ3, Claim 5; EQ3, Claim 3; EQ6, Claim 6.1; EQ4, Claim 1"
-,"UNFPA contributed 90% to midwifery policy documents, including national guidelines, SOPs, job descriptions, and deployment policies, crucial for both education and service delivery.","Evaluation Matrix based on findings.pdf, EQ3, Claim 5; EQ3, Claim 1; EQ3, Claim 3; EQ6, Claim 6.1; EQ4, Claim 3"
-,"The Labor Room Protocol, a ""significant"" third edition developed with UNFPA's assistance, aims to significantly reduce maternal and infant mortality upon implementation.","Evaluation Matrix based on findings.pdf, EQ1, Claim 6; EQ1, Claim 8; EQ3, Claim 1; EQ3, Claim 3; EQ6, Claim 6.1"
-,"Policy formulation is strong, but enforcement and systems are weak. Chronic stock-outs of commodities, legal barriers to staff recruitment, and loopholes in child marriage law persist.","Evaluation Matrix based on findings.pdf, EQ6, Claim 4; EQ5, Claim 10.4"
-,"The DGHS Official points to a significant shortage of skilled human resources at the field level (half-empty) as a major bottleneck, hindering the scale-up of quality services.","Evaluation Matrix based on findings.pdf, EQ1, Claim 9; EQ3, Claim 2; EQ3, Claim 6; EQ6, Claim 2; EQ6, Claim 4"
-,"The DGNM trains midwives but lacks control over service delivery infrastructure (DG Health controls the ""house""). This creates a big integration issue that needs to be thought about at the Ministry level.","Evaluation Matrix based on findings.pdf, EQ1, Claim 9; EQ3, Claim 7; EQ3, Claim 5; EQ6, Claim 2; EQ6, Claim 4"
-,"Only 2,500 midwives have been deployed in the last 10 years, drastically short of the 22,000 target by 2030, limiting service delivery impact.","Evaluation Matrix based on findings.pdf, EQ3, Claim 8; EQ3, Claim 6; EQ6, Claim 2; EQ5, Claim 10.4"
-"Conclusion 4. Sustainability and the shift from project-based funding to diversified, domestically anchored financing have advanced but remain fragile. Institutionalization is visible in standards and system use, yet continuity is vulnerable where public financing is inconsistent, execution lags persist, and equity-related costs are not routinely tracked and protected. ","The shift from funding to financing is evident, as the government is increasingly taking financial ownership, now covering midwifery student stipends and internship allowances from its revenue fund.","Evaluation Matrix based on findings.pdf, EQ5, Claim 10.1; EQ5, Claim 12.1"
-,"UNFPA explicitly designs interventions as pilots, expecting the government to scale them up into national Development Project Proposals.","Evaluation Matrix based on findings.pdf, EQ5, Claim 10.1; EQ5, Claim 12.1"
-,"The Komolful Pharmacy initiative is designed as a self-sustaining business model, aiming for long-term viability without external funding.","Evaluation Matrix based on findings.pdf, EQ4, Claim 4; EQ4, Claim 2; EQ5, Claim 12.6"
-,"Fistula and MPDSR programs rely heavily on UNFPA's limited internal funds and grants, facing significant funding gaps due to low donor interest.","Evaluation Matrix based on findings.pdf, EQ3, Claim 6"
-,"The Sapmara project in the Shantaal community, which significantly Informant at Sapmara UH&FWC, Transcripts increased institutional deliveries, faces severe doubt about its sustainability as it ends in December 2025.","Evaluation Matrix based on findings.pdf, EQ3, Claim 6; EQ6, Claim 2"
-,"Budget allocation is insufficient, leading to service gaps and reliance on short-term funding and community contributions. There is chronic underfunding for GBV prevention... and national stockouts of family planning commodities.","Evaluation Matrix based on findings.pdf, EQ5, Claim 10.4"
-,The absence of an approved government Operation Plan causes critical shortages of essential medicines and logistics in the field.,"Evaluation Matrix based on findings.pdf, EQ1, Claim 9; EQ3, Claim 6; EQ6, Claim 2; EQ6, Claim 5"
-,"Resource distribution across thematic areas is uneven, with funding and staff concentrated in donor-priority districts and humanitarian hotspots, leading to inequitable access and variable implementation quality.","Evaluation Matrix based on findings.pdf, EQ1, Claim 9; EQ4, Claim 6"
-,"Execution gaps in budget performance, HR/logistics and uneven subnational capacity slow translation from policy to practice...","Evaluation Matrix based on findings.pdf, EQ5, Claim 10.4"
-,"Crucially, comprehensive national monitoring of LNOB adherence is challenged by persistent data gaps for disaggregated information, particularly concerning persons with disabilities, in the national health information system (DHIS2).","Evaluation Matrix based on findings.pdf, EQ5, Claim 10.4; EQ5, Claim 11.4"
-"Conclusion 5. Innovation is a clear comparative advantage for UNFPA, successfully accelerating progress (e.g., Komolful Pharmacy, Block-chain, WHDs). However, this success is not yet systematic: it is not consistently embedded in the Programme's strategic positioning. System-wide adoption is held back by project fragmentation and the absence of a structured pathway, requiring clear policy uptake, dedicated funding, transition of successful pilots to replication and government budget inclusion. ","UNFPA launched a partnership with Zaynax Health, Impact Hub Dhaka, Gram Unnayan Karma, and ToguMogu to expand access to sexual and reproductive health and family planning services for women by offering training and mentorship to woman pharmacist entrepreneurs.","Evaluation Matrix based on findings.pdf, EQ4, Claim 4; EQ4, Claim 2"
-,"The Komolful Pharmacy initiative is designed as a self-sustaining business model, aiming for long-term viability without external funding.","Evaluation Matrix based on findings.pdf, EQ4, Claim 4; EQ4, Claim 2; EQ5, Claim 12.6"
-,"WFP, FAO, and UNFPA are using blockchain to reach low-income women in the urban slums with food aid and information about menstrual health management and gender-based violence.","Evaluation Matrix based on findings.pdf, EQ4, Claim 4; EQ4, Claim 3"
-,"UNFPA set up and supported a total of 120 facilities, including 27 Women’s Help Desks at Police Stations.","Evaluation Matrix based on findings.pdf, EQ3, Claim 4"
-,"UNFPA works in urban slums, providing midwife-led care, contraceptives, and using a mobile app (Ma-Jaan) for emergency referrals to address difficult SRHR access.","Evaluation Matrix based on findings.pdf, EQ1, Claim 4"
-,"The lack of a clear plan for government takeover and sustainability of donor-supported programs once funding ends creates ""big gaps"" and service discontinuation.","Evaluation Matrix based on findings.pdf, EQ6, Claim 4"
-,"Strategic platforms exist and facilitate dialogue, but budgetary/resource integration is weak; uneven resource distribution across thematic areas.","Evaluation Matrix based on findings.pdf, EQ2, Claim 2; EQ3, Claim 7"
-,"All intervention taken by A&Y team was not mentioned in the TOC. For example integrating Sombhabona program with Jibikayon and VWB was not in TOC. However, keepin the theme of og outcome and intervention in mind, interventions have been adapted.","Evaluation Matrix based on findings.pdf, EQ2, Claim 4"
-"Conclusion 6. Integration of megatrends (such as climate change and aging populations) is successful in localized pilots but remains unsystematic due to the absence of institutional mechanisms. While progress is visible in specific initiatives, the necessary anticipation and adaptation (i.e., forward-looking risk-informed strategic framework and adjustments) are not consistently applied across thematic areas or system levels to institutionalize the megatrends across all routine programming. ","UNFPA integrates climate change issues into training and services, responding to the megatrend and its impact on vulnerable communities.","Evaluation Matrix based on findings.pdf, EQ2, Claim 1"
-,The DGNM integrates climate change issues and care for persons with disabilities and the elderly into midwifery and nursing training programs.,"Evaluation Matrix based on findings.pdf, EQ1, Claim 6"
-,UNFPA addresses the aging population megatrend by exploring geriatric care at the upazila level and integrating elderly care into midwife/nurse training.,"Evaluation Matrix based on findings.pdf, EQ2, Claim 1"
-,"UNFPA developed training modules on climate change and SRHR for healthcare providers, integrating it into the midwifery curriculum.","Evaluation Matrix based on findings.pdf, EQ1, Claim 6"
-,"The program includes MISP for disaster situations and works with vulnerable, disaster-prone groups in areas like Sunamganj and Cox's Bazar.","Evaluation Matrix based on findings.pdf, EQ1, Claim 1; EQ1, Claim 6"
-,UNFPA distributed dignity kits to vulnerable families in flood-prone districts as anticipatory disaster relief.,"Evaluation Matrix based on findings.pdf, EQ1, Claim 1; EQ1, Claim 6"
-,"Evidence of ToCs directly driving field-level adaptation to all megatrends is limited, with climate and migration addressed more superficially than gender and youth.","Evaluation Matrix based on findings.pdf, EQ4, Claim 3"
-,"Resource distribution across thematic areas is uneven, with funding and staff concentrated in donor-priority districts and humanitarian hotspots, leading to inequitable access and variable implementation quality.","Evaluation Matrix based on findings.pdf, EQ1, Claim 9; EQ4, Claim 6"
-,"The M&E system could be more geared towards the assessment of results for vulnerable groups, including disaggregation of data by sex, age and province/district. This seems to be a weak area needing some attention to achieve “no one left behind” objectives by 2030.","Evaluation Matrix based on findings.pdf, EQ1, Claim 12; EQ2, Claim 2; EQ4, Claim 5; EQ4, Claim 6; EQ6, Claim 6"
-"Conclusion 7. Delivery stayed resilient during shocks through agile resequencing and flexible resource use. However, chronic execution bottlenecks undermined timeliness, cost-efficiency, and equity, especially in hard-to-reach districts. Stop-start delivery, late-year spending spikes, and uneven subnational performance persisted where approval, cash, and supply-chain dissonance were unresolved. ",Issues include limited availability of reproductive services in disaster-prone coastal areas and vulnerable housing.,"Evaluation Matrix based on findings.pdf, EQ1, Claim 1"
-,UNFPA distributed dignity kits to vulnerable families in flood-prone districts as anticipatory disaster relief.,"Evaluation Matrix based on findings.pdf, EQ1, Claim 1; EQ1, Claim 6"
-,"In response to floods in Chattogram, UNFPA provided dignity kits, MHM kits, and baby kits to 12,000 women and 6,120 girls, including those with disabilities and transgender women.","Evaluation Matrix based on findings.pdf, EQ1, Claim 4"
-,The absence of an approved government Operation Plan causes critical shortages of essential medicines and logistics in the field.,"Evaluation Matrix based on findings.pdf, EQ1, Claim 9; EQ3, Claim 6; EQ6, Claim 2; EQ6, Claim 5"
-,"Chronic stock-outs of commodities, legal barriers to staff recruitment, and loopholes in child marriage law (e.g., fake birth certificates, unregistered marriages) persist.","Evaluation Matrix based on findings.pdf, EQ1, Claim 9; EQ6, Claim 4; EQ5, Claim 10.4"
-,"Remote island and hard-to-reach communities (e.g., Saint Martin’s, Kutubdia, Maheshkhali) remain underserved.","Evaluation Matrix based on findings.pdf, EQ1, Claim 11; EQ3, Claim 8; EQ4, Claim 3; EQ6, Claim 2"
-,"The operations team reported that midwifery deployment is taking place... but challenges in retaining midwives at the field level persist, alongside under-resourcing for essential services and **delays in the procurement of programme supplies.","Evaluation Matrix based on findings.pdf, EQ5, Claim 10.5; EQ5, Claim 12.4"
-,"Due to the bureaucratic process in approving the Government's Technical Assistance Project Proposal (TAPP), the CO could not sign workplans with some government IPs.","Evaluation Matrix based on findings.pdf, EQ5, Claim 10.4"
-"Conclusion 8. UNFPA-supported midwifery and maternal health models deliver effective, high-quality care and provide a credible national normative model. However, scaling these models to routine national coverage is constrained by human-resource shortfalls and subnational capacity gaps. ","UNFPA significantly supports midwifery, a government priority for achieving SDG targets for maternal and newborn mortality and making SRHR services available.","Evaluation Matrix based on findings.pdf, EQ1, Claim 8; EQ3, Claim 1"
-,UNFPA has trained and licensed a total of 7520 ICM standard midwives.,"Evaluation Matrix based on findings.pdf, EQ3, Claim 4; EQ5, Claim 12.1"
-,"Midwives assisted in the delivery of 81% of sub-district hospital births in 2022, compared to 24–35% in 2018.","Evaluation Matrix based on findings.pdf, EQ3, Claim 4; EQ5, Claim 10.3"
-,"Only 2,500 midwives have been deployed in the last 10 years, drastically short of the 22,000 target by 2030, limiting service delivery impact.","Evaluation Matrix based on findings.pdf, EQ3, Claim 8; EQ3, Claim 6; EQ6, Claim 2; EQ5, Claim 10.4; EQ5, Claim 12.5"
-,"The DGHS Official points to a significant shortage of skilled human resources at the field level (half-empty) as a major bottleneck, hindering the scale-up of quality services.","Evaluation Matrix based on findings.pdf, EQ1, Claim 9; EQ3, Claim 2; EQ3, Claim 6; EQ6, Claim 2; EQ6, Claim 4"
-,"The DGNM trains midwives but lacks control over service delivery infrastructure (DG Health controls the ""house""). This creates a big integration issue that needs to be thought about at the Ministry level.","Evaluation Matrix based on findings.pdf, EQ1, Claim 9; EQ3, Claim 7; EQ3, Claim 5; EQ6, Claim 2; EQ6, C"
-,"Even where midwives are deployed in Union Sub-Centers, lack of proper infrastructure and logistics prevents them from working effectively.","Evaluation Matrix based on findings.pdf, EQ5, Claim 10.4; EQ5, Claim 12.5"
-,The closure of 43 BRAC midwifery centers due to lack of government registration highlights a disconnect between service provision and regulatory compliance.,"Evaluation Matrix based on findings.pdf, EQ1, Claim 9"
-,"UNFPA contributed 90% to midwifery policy documents, including national guidelines, SOPs, job descriptions, and deployment policies, crucial for both education and service delivery.","Evaluation Matrix based on findings.pdf, EQ3, Claim 5; EQ3, Claim 1; EQ3, Claim 3; EQ6, Claim 6.1; EQ4, Claim 3"
-"Conclusion 9. GBV service models are effective and survivor-centred, backed by a stronger evidence base and policy gains. However, continuity and completion were limited by funding shortfalls and weak anchoring in domestic budgets. ",UNFPA enhanced survivor-centered services by increasing the number of facilities providing GBV response from 0 in 2021 to 143 in 2023.,"Evaluation Matrix based on findings.pdf, EQ5, Claim 10.1; EQ5, Claim 10.3"
-,"UNFPA set up and supported a total of 120 facilities, including 27 Women’s Help Desks at Police Stations.","Evaluation Matrix based on findings.pdf, EQ3, Claim 4"
-,UNFPA successfully supported the Census 2022 and VAW Survey 2024 to gather disaggregated data on marginalized populations.,"Evaluation Matrix based on findings.pdf, EQ1, Claim 5; EQ3, Claim 6; EQ4, Claim 1"
-,"UNFPA supported the Ministry of Women and Children Affairs (MoWCA) in leading several important law reform processes to address violence against women and girls (e.g., amendment of the Domestic Violence Act).","Evaluation Matrix based on findings.pdf, EQ3, Claim 5; EQ6, Claim 6.1; EQ4, Claim 3"
-,UNFPA supported the development of a National Guideline for the Prevention of Son Preference and Gender Biased Sex Selection.,"Evaluation Matrix based on findings.pdf, EQ4, Claim 3"
-,"Budget allocation is insufficient, leading to service gaps and reliance on short-term funding and community contributions. There is chronic underfunding for GBV prevention... and national stockouts of family planning commodities.","Evaluation Matrix based on findings.pdf, EQ5, Claim 10.4; EQ5, Claim 10.5"
-,Standard Operating Procedures (SOPs) for medico-legal services for Gender-Based Violence (GBV) survivors were developed and integrated across health care tiers.,"Evaluation Matrix based on findings.pdf, EQ5, Claim 10.6; EQ5, Claim 12.2"
-,The UNFPA and Health Economics Unit collaboratively developed a Standard Operating Procedure (SOP) for providing medico-legal services to Gender Based Violence (GBV) survivors.,"Evaluation Matrix based on findings.pdf, EQ5, Claim 10.2; EQ5, Claim 12.2"
-"Conclusion 10. High-quality data and demographic intelligence were produced but were under-used in budgeting and decentralized planning, limiting equity-focused resource allocation and risk-informed delivery. ",UNFPA successfully supported the Census 2022 and VAW Survey 2024 to gather disaggregated data on marginalized populations.,"Evaluation Matrix based on findings.pdf, EQ1, Claim 5; EQ3, Claim 6; EQ4, Claim 1"
-,"The SVRS system collects data on disability, and initiated capturing the ethnic status of the household members since 2021. (Note: While collected, this is separate from routine health systems like DHIS2, supporting the routine limitation claim.)","Evaluation Matrix based on findings.pdf, EQ4, Claim 5; EQ1, Claim 12"
-,"UNFPA is developing a Logistics Management Information System (LMIS) to improve supply chain in five priority districts, enhancing resource use.","Evaluation Matrix based on findings.pdf, EQ1, Claim 1; EQ1, Claim 5; EQ3, Claim 3; EQ3, Claim 6"
-,"UNFPA IPs often collect sex, age, and disability data for reporting, but lack the capacity to use this information for adaptive programming or resource targeting.","Evaluation Matrix based on findings.pdf, EQ1, Claim 9; EQ3, Claim 8; EQ3, Claim 2; EQ3, Claim 5; EQ4, Claim 6; EQ6, Claim 5; EQ6, Claim 6"
-,"Resource distribution across thematic areas is uneven, with funding and staff concentrated in donor-priority districts and humanitarian hotspots, leading to inequitable access and variable implementation quality.","Evaluation Matrix based on findings.pdf, EQ1, Claim 9; EQ4, Claim 6"
-,"The M&E system could be more geared towards the assessment of results for vulnerable groups, including disaggregation of data by sex, age and province/district.","Evaluation Matrix based on findings.pdf, EQ1, Claim 12; EQ2, Claim 2; EQ4, Claim 5; EQ4, Claim 6; EQ6, Claim 6"
-,"DHIS2 integration and district-facing dashboards shortened feedback loops and informed supervision; managers call district SRHR officers “very instrumental… data updated… great impact,” indicating uptake.","Evaluation Matrix based on findings.pdf, EQ5, Claim 12.3"
-,"Progressive DHIS2 integration and district-facing visualization tools have shortened feedback loops, enabling supervisors to spot equity gaps and course-correct within planning cycles.","Evaluation Matrix based on findings.pdf, EQ5, Claim 12.3"
-,"The Programme operationalized a financing lens (costed notes, joint indicators, sector/budget dialogues, IFI/private outreach); in early 2025 an investment case completed on child marriage.","Evaluation Matrix based on findings.pdf, EQ5, Claim 12.6"
-"Conclusion 11. For adolescents and youth, system-based, collaborative, and innovative approaches show promise for wellbeing and empowerment. However, inclusion and sustainability remain inconsistent. ","All intervention taken by A&Y team was not mentioned in the TOC. For example integrating Sombhabona program with Jibikayon and VWB was not in TOC. However, keepin the theme of og outcome and intervention in mind, interventions have been adapted.","Evaluation Matrix based on findings.pdf, EQ2, Claim 4"
-,Advocacy efforts led to the inclusion of 17 specific indicators for young people in the Intersector Needs Assessment for the Rohingya response.,"Evaluation Matrix based on findings.pdf, EQ1, Claim 5; EQ1, Claim 8; EQ3, Claim 2; EQ4, Claim 4"
-,"UNFPA facilities recorded 300,000 visits from adolescents last year, including repeated visits.","Evaluation Matrix based on findings.pdf, EQ5, Claim 10.3"
-,UNFPA collaborated with UNICEF in the curriculum development on Adolescent health and wellbeing with both technical and financial support.,"Evaluation Matrix based on findings.pdf, EQ4, Claim 5"
-,"In the Rohingya community, UNFPA-supported partners use the Sasa approach for social mobilization, GBV prevention, and child marriage awareness, empowering women and engaging men.","Evaluation Matrix based on findings.pdf, EQ1, Claim 6; EQ4, Claim 2"
-,"UNFPA launched a partnership with Zaynax Health, Impact Hub Dhaka, Gram Unnayan Karma, and ToguMogu to expand access to sexual and reproductive health and family planning services for women by offering training and mentorship to woman pharmacist entrepreneurs.","Evaluation Matrix based on findings.pdf, EQ4, Claim 4; EQ4, Claim 2"
-,"Remote island and hard-to-reach communities (e.g., Saint Martin’s, Kutubdia, Maheshkhali) remain underserved, and SRHR for LGBTQ+ populations needs more focus and intersectional understanding.","Evaluation Matrix based on findings.pdf, EQ1, Claim 11"
-,"Only 3.1% of riverine-displaced women received continuum of maternal care, compared to nearly 27% in non-displaced areas.","Evaluation Matrix based on findings.pdf, EQ1, Claim 11; EQ3, Claim 8"
-,"Over 80% of transgender/gender diverse populations experience third-party violence, highlighting a severe protection gap.","Evaluation Matrix based on findings.pdf, EQ1, Claim 11"
-"Conclusion 12. The Humanitarian–Development–Peace nexus operates effectively in Cox's Bazar, linking life-saving services with medium-term integration and supporting social resilience. However, durable resilience remains structurally constrained and fiscally vulnerable. ","Operational collaboration is standard in the humanitarian response (Rohingya camps) but inconsistent outside crisis contexts and often project-specific, not a core operational norm.","Evaluation Matrix based on findings.pdf, EQ3, Claim 7; EQ2, Claim 2"
-,The Gender-based Violence Sub Sector and focal points developed a dashboard for real-time mapping and referral pathway sharing in refugee camps.,"Evaluation Matrix based on findings.pdf, EQ1, Claim 5; EQ3, Claim 3"
-,"In the Rohingya community, UNFPA-supported partners use the Sasa approach for social mobilization, GBV prevention, and child marriage awareness, empowering women and engaging men.","Evaluation Matrix based on findings.pdf, EQ1, Claim 6; EQ4, Claim 2"
-,"With UNFPA support, the Ministry of Health integrated the Minimum Initial Service Package (MISP) into the 5th Health Sector Operational Plan.","Evaluation Matrix based on findings.pdf, EQ1, Claim 6; EQ5, Claim 10.2"
-,"UNFPA's Rohingya response prioritizes gender-based violence (GBV), SRHR, and adolescent/youth services for women, girls, and young people in camps and host communities.","Evaluation Matrix based on findings.pdf, EQ5, Claim 11.2"
-,"Over 326,000 women and girls, including over 3,900 persons with disabilities, accessed GBV prevention and response services via UNFPA-supported women-friendly spaces in Cox’s Bazar in 2023.","Evaluation Matrix based on findings.pdf, EQ5, Claim 11.1"
-,"In 2022, 39 WFS provided GBV services to >311,000 women/girls, including >5,400 PWD—systematic disability tracking within humanitarian GBV services.","Evaluation Matrix based on findings.pdf, EQ5, Claim 11.1"
-,"UNFPA co-created a common beneficiary database with WFP, FAO, UNICEF, and Bangladesh Red Crescent Society for disaster response.","Evaluation Matrix based on findings.pdf, EQ1, Claim 6; EQ4, Claim 5"
-,"Crucially, comprehensive national monitoring of LNOB adherence is challenged by persistent data gaps for disaggregated information, particularly concerning persons with disabilities, in the national health information system (DHIS2).","Evaluation Matrix based on findings.pdf, EQ5, Claim 10.4; EQ5, Claim 11.4"
-,"The conceptualization, planning, and implementation of the Minimum Initial Service Package (MISP) for humanitarian response have not yet been fully integrated into routine government systems, and there is minimal government ownership and insufficient coordination between the Ministry of Health and Family Welfare (MoHFW) and the Ministry of Disaster Management and Relief.","Evaluation Matrix based on findings.pdf, EQ4, Claim 4"
-"Recommendation 1. In the next country programme cycle, strengthen the strategic and system-change focus of the programme, guided by three interconnected Theories of Change based on the three transformative results (3TRs) and aligned with the UNFPA Strategic Plan 2026–2029, including its six outputs, three intermediate outcomes, and four overall outcomes. The programme should be grounded in UNFPA’s comparative advantage and value added in the country, reinforce an integrated approach, mainstream climate and environmental responsiveness, respond to demographic changes, systematically prioritize the poorest and most vulnerable populations and those furthest left behind, and deepen partnerships both within and beyond the UN system. ","The 10th Country Programme did not include a single Theory of Change, but four thematic Theories of Change. This has not facilitated systemic inter-area work but has reinforced intra-area focus.","Evaluation Matrix based on findings.pdf, EQ2, Claim 2"
-,The absence of a unified (“umbrella”) ToC has limited system-wide adaptive responses and joint monitoring across areas—highlighting a cross-area coordination issue to address in management responses.,"Evaluation Matrix based on findings.pdf, EQ2, Claim 2"
-,"Lack of robust, documented cross-thematic integration in planning... integration is more ad hoc than systemic, particularly at sub-national levels.","Evaluation Matrix based on findings.pdf, EQ3, Claim 7"
-,"Operational collaboration is standard in the humanitarian response (Rohingya camps) but inconsistent outside crisis contexts and often project-specific, not a core operational norm.","Evaluation Matrix based on findings.pdf, EQ3, Claim 7; EQ2, Claim 2"
-,"Strategic platforms exist and facilitate dialogue, but budgetary/resource integration is weak; uneven resource distribution across thematic areas.","Evaluation Matrix based on findings.pdf, EQ2, Claim 2; EQ3, Claim 7"
-,"Application of LNOB principle, cross-cutting approaches and data disaggregation by vulnerabilities is widespread but not yet systematic everywhere, and current data are insufficient to verify that LNOB groups benefited most.","Evaluation Matrix based on findings.pdf, EQ5, Claim 11.6"
-,"Evidence of ToCs directly driving field-level adaptation to all megatrends is limited, with climate and migration addressed more superficially than gender and youth.","Evaluation Matrix based on findings.pdf, EQ4, Claim 3"
-,"UNFPA IPs often collect sex, age, and disability data for reporting, but lack the capacity to use this information for adaptive programming or resource targeting.","Evaluation Matrix based on findings.pdf, EQ1, Claim 9; EQ3, Claim 8; EQ3, Claim 2; EQ3, Claim 5; EQ4, Claim 6; EQ6, Claim 5; EQ6, Claim 6"
-"Recommendation 2: Looking ahead, the new country programme needs to strengthen the sustainability, predictability, and national ownership of financing by accelerating the transition from short-term, project-based support to diversified and nationally embedded financing mechanisms. UNFPA should promote the establishment of sustainable national compacts integrated into government budgets and Medium-Term Expenditure Frameworks (MTEFs), linking demographic intelligence and evidence generation to fiscal policy, budgeting, and resource allocation. The programme should also invest in testing, refining, and scaling sustainable innovations, and expand public–private partnerships to enhance long-term sustainability and impact. ","The shift from funding to financing is evident, as the government is increasingly taking financial ownership, now covering midwifery student stipends and internship allowances from its revenue fund.","Evaluation Matrix based on findings.pdf, EQ5, Claim 10.1; EQ5, Claim 12.1"
-,"The Komolful Pharmacy initiative is designed as a self-sustaining business model, aiming for long-term viability without external funding.","Evaluation Matrix based on findings.pdf, EQ4, Claim 4; EQ4, Claim 2; EQ5, Claim 12.6"
-,"UNFPA explicitly designs interventions as pilots, expecting the government to scale them up into national Development Project Proposals.","Evaluation Matrix based on findings.pdf, EQ5, Claim 10.1; EQ5, Claim 12.1"
-,Lack of involvement of private sectors to deliver FP services and need for more initiatives for mainstreaming the private sectors with the routine system.,"Evaluation Matrix based on findings.pdf, EQ4, Claim 4; EQ4, Claim 2"
-,"The lack of a clear plan for government takeover and sustainability of donor-supported programs once funding ends creates ""big gaps"" and service discontinuation.","Evaluation Matrix based on findings.pdf, EQ6, Claim 4"
-,"Fistula and MPDSR programs rely heavily on UNFPA's limited internal funds and grants, facing significant funding gaps due to low donor interest.","Evaluation Matrix based on findings.pdf, EQ3, Claim 6"
-,"Resource distribution across thematic areas is uneven, with funding and staff concentrated in donor-priority districts and humanitarian hotspots, leading to inequitable access and variable implementation quality.","Evaluation Matrix based on findings.pdf, EQ1, Claim 9; EQ4, Claim 6"
-,"UNFPA, jointly with the General Economics Division of Bangladesh Planning Commission, launched a brief called ‘Changing Population Dynamics of Bangladesh and Policy Actions to Realise the 1st and 2nd Demographic Dividend’.","Evaluation Matrix based on findings.pdf, EQ4, Claim 1"
-,"The Programme operationalized a financing lens (costed notes, joint indicators, sector/budget dialogues, IFI/private outreach); in early 2025 an investment case completed on child marriage.","Evaluation Matrix based on findings.pdf, EQ5, Claim 12.6"
-,UNFPA supported the Ministry of Women and Children Affairs (MoWCA) in developing a costed monitoring and evaluation framework for the National Action Plan on Violence Against Women (NAP-VAW).,"Evaluation Matrix based on findings.pdf, EQ3, Claim 3; EQ4, Claim 3"
-"Recommendation 3. The next country programme needs to strengthen and standardize the cross-cutting implementation of the Leave No One Behind (LNOB) principle to ensure that equity and inclusion are systematically applied across all programme areas and that inequalities are effectively addressed in the context of the country’s transition to middle-income status. The programme should institutionalize LNOB as a core programming standard, supported by a clear pathway, methodology, and accountability framework for its operationalization. Implementation effectiveness should be consistently guided by disaggregated data on reach and results, and by participatory approaches that promote the inclusion of women, adolescents, persons with disabilities, ethnic minorities, and other marginalized and most vulnerable population groups, while enhancing institutional capacities to sustain equitable and inclusive outcomes. ","A shared pathway or methodology for LNOB implementation is not in place, and measurement remains the Achilles’ heel.","Evaluation Matrix based on findings.pdf, EQ5, Claim 11.4"
-,"Application of LNOB principle, cross-cutting approaches and data disaggregation by vulnerabilities is widespread but not yet systematic everywhere, and current data are insufficient to verify that LNOB groups benefited most.","Evaluation Matrix based on findings.pdf, EQ5, Claim 11.6"
-,"UNFPA IPs often collect sex, age, and disability data for reporting, but lack the capacity to use this information for adaptive programming or resource targeting.","Evaluation Matrix based on findings.pdf, EQ1, Claim 9; EQ3, Claim 8; EQ3, Claim 2; EQ3, Claim 5; EQ4, Claim 6; EQ6, Claim 5; EQ6, Claim 6"
-,"A significant and persistent data gap exists for disaggregated data, particularly concerning persons with disabilities, which remains largely unavailable within the national health information system (DHIS2).","Evaluation Matrix based on findings.pdf, EQ1, Claim 9; EQ1, Claim 12; EQ4, Claim 1; EQ4, Claim 3; EQ4, Claim 5; EQ6, Claim 6"
-,"Mechanisms to include people with disabilities are not fully effective: while reserved seats on committees exist, these individuals often remain excluded from actual decision-making.","Evaluation Matrix based on findings.pdf, EQ1, Claim 9; EQ4, Claim 3"
-,"UNFPA and partners actively involve vulnerable groups in program design and implementation at the community level. In Cox's Bazar, FGD with Youth groups co-design and lead research and projects.","Evaluation Matrix based on findings.pdf, EQ1, Claim 5; EQ1, Claim 7"
-,"To ensure the Leave No One Behind (LNOB) approach, UNFPA deployed midwives to the most marginalised indigenous communities, such as the Santal in Gaibandha.","Evaluation Matrix based on findings.pdf, EQ1, Claim 1; EQ1, Claim 3"
-"Recommendation 4. In the next country programme cycle, UNFPA needs to further strengthen and institutionalize innovation, scaling, and knowledge management to enhance sustainability and accelerate impact, building on existing innovations and learning. The programme should reinforce UNFPA’s positioning and communication as a future-oriented, evidence-driven agency, fostering an innovation culture and integrating innovative practices across all programme areas. UNFPA should also promote the sharing and adaptation of proven models and approaches through south–south collaboration and knowledge exchange to expand reach and replicate successful solutions. ","The lack of a clear plan for government takeover and sustainability of donor-supported programs once funding ends creates ""big gaps"" and service discontinuation.","Evaluation Matrix based on findings.pdf, EQ6, Claim 4"
-,"UNFPA explicitly designs interventions as pilots, expecting the government to scale them up into national Development Project Proposals.","Evaluation Matrix based on findings.pdf, EQ5, Claim 10.1; EQ5, Claim 12.1"
-,"WFP, FAO, and UNFPA are using blockchain to reach low-income women in the urban slums with food aid and information about menstrual health management and gender-based violence.","Evaluation Matrix based on findings.pdf, EQ4, Claim 4; EQ4, Claim 3"
-,"UNFPA launched a partnership with Zaynax Health, Impact Hub Dhaka, Gram Unnayan Karma, and ToguMogu to expand access to sexual and reproductive health and family planning services for women by offering training and mentorship to woman pharmacist entrepreneurs.","Evaluation Matrix based on findings.pdf, EQ4, Claim 4; EQ4, Claim 2"
-,"The Komolful Pharmacy initiative is designed as a self-sustaining business model, aiming for long-term viability without external funding.","Evaluation Matrix based on findings.pdf, EQ4, Claim 4; EQ4, Claim 2; EQ5, Claim 12.6"
-,"A digital monitoring tool for FP in the garment sector was launched, providing real-time data to improve service delivery efficiency.","Evaluation Matrix based on findings.pdf, EQ3, Claim 3; EQ5, Claim 12.3"
-"Recommendation 5: Going forward, UNFPA and partners should enhance national capacity for demographic foresight to anticipate and respond to population dynamics in the context of climate change, migration, urbanization, and other emerging megatrends. Building on existing analytical and planning tools, the programme should promote forward-looking, risk-informed approaches that connect population evidence with adaptive governance and policy planning. Strengthening these systems will enable more resilient, equitable, and rights-based responses across the humanitarian–development–peace nexus. ",UNFPA addresses the aging population megatrend by exploring geriatric care at the upazila level and integrating elderly care into midwife/nurse training.,"Evaluation Matrix based on findings.pdf, EQ2, Claim 1"
-,"UNFPA integrates climate change issues into training and services, responding to the megatrend and its impact on vulnerable communities.","Evaluation Matrix based on findings.pdf, EQ2, Claim 1"
-,"UNFPA developed training modules on climate change and SRHR for healthcare providers, integrating it into the midwifery curriculum.","Evaluation Matrix based on findings.pdf, EQ1, Claim 6"
-,"The program includes MISP for disaster situations and works with vulnerable, disaster-prone groups in areas like Sunamganj and Cox's Bazar.","Evaluation Matrix based on findings.pdf, EQ1, Claim 1; EQ1, Claim 6"
-,"Evidence of ToCs directly driving field-level adaptation to all megatrends is limited, with climate and migration addressed more superficially than gender and youth.","Evaluation Matrix based on findings.pdf, EQ4, Claim 3"
-,"Population dynamics (ageing, migration, displacement) were not systematically linked to programmatic budget requirements and service planning. Consequently, risk-informed, whole-of-portfolio adjustments, i.e., formal strategic changes in UNFPA's internal budget allocation and external policy advocacy, were sporadic rather than routine.","Evaluation Matrix based on findings.pdf, EQ6, Claim 10"
-,"UNFPA, jointly with the General Economics Division of Bangladesh Planning Commission, launched a brief called ‘Changing Population Dynamics of Bangladesh and Policy Actions to Realise the 1st and 2nd Demographic Dividend’.","Evaluation Matrix based on findings.pdf, EQ4, Claim 1"
-,"UNFPA took the lead in revising the National Adaptation Plan for Health for Bangladesh in 2023, collaborating with MOHFW, WHO, and UNICEF.","Evaluation Matrix based on findings.pdf, EQ3, Claim 5; EQ5, Claim 12.2"
-"Recommendation 6: In the next country programme cycle, strengthen and expand sexual and reproductive health (SRH) systems and service delivery to ensure equitable access and quality of care. The programme should build on proven models and successful UNFPA-supported approaches to institutionalize quality assurance mechanisms, address systemic bottlenecks in service coverage, human resources, and data systems, and advance universal access to comprehensive, rights-based SRH services. ","Midwives assisted in the delivery of 81% of sub-district hospital births in 2022, compared to 24–35% in 2018.","Evaluation Matrix based on findings.pdf, EQ3, Claim 4; EQ5, Claim 10.3"
-,"The ""Santal Help Project"" increased institutional deliveries in the Shantaal community from 0% to 24%, building trust and providing free services.","Evaluation Matrix based on findings.pdf, EQ4, Claim 1; EQ5, Claim 10.3; EQ5, Claim 11.1"
-,"Only 2,500 midwives have been deployed in the last 10 years, drastically short of the 22,000 target by 2030, limiting service delivery impact.","Evaluation Matrix based on findings.pdf, EQ3, Claim 8; EQ3, Claim 6; EQ6, Claim 2; EQ5, Claim 10.4; EQ5, Claim 12.5"
-,"The DGHS Official points to a significant shortage of skilled human resources at the field level (half-empty) as a major bottleneck, hindering the scale-up of quality services.","Evaluation Matrix based on findings.pdf, EQ1, Claim 9; EQ3, Claim 2; EQ3, Claim 6; EQ6, Claim 2; EQ6, Claim 4"
-,"The DGNM trains midwives but lacks control over service delivery infrastructure (DG Health controls the ""house""). This creates a big integration issue that needs to be thought about at the Ministry level.","Evaluation Matrix based on findings.pdf, EQ1, Claim 9; EQ3, Claim 7; EQ3, Claim 5; EQ6, Claim 2; EQ6, Claim 4"
-,"UNFPA is supporting the development of a digital referral system and mobile medical teams to reach hard-to-reach populations, including those in coastal, char, and haor areas, and urban slums.","Evaluation Matrix based on findings.pdf, EQ1, Claim 1; EQ1, Claim 6"
-,UNFPA supported nine priority districts to begin implementation of Maternal and Perinatal Death Surveillance and Response.,"Evaluation Matrix based on findings.pdf, EQ1, Claim 1; EQ3, Claim 1"
-,"UNFPA supported integration of SRHR indicators into DHIS2/Health Management Information System (HMIS): by 2024, 8 of 14 were fully integrated and reporting nationally.","Evaluation Matrix based on findings.pdf, EQ5, Claim 10.2; EQ5, Claim 10.6; EQ5, Claim 12.3"
-"Recommendation 7: Going forward, strengthen gender equality and protection systems by scaling up proven survivor-centred models, advancing social and behaviour change, and ensuring sustainable financing and coordination across sectors. The programme should deepen partnerships and reinforce national ownership to sustain gender-transformative results for women and girls. ",UNFPA enhanced survivor-centered services by increasing the number of facilities providing GBV response from 0 in 2021 to 143 in 2023.,"Evaluation Matrix based on findings.pdf, EQ5, Claim 10.1; EQ5, Claim 10.3"
-,"UNFPA set up and supported a total of 120 facilities, including 27 Women’s Help Desks at Police Stations.","Evaluation Matrix based on findings.pdf, EQ3, Claim 4"
-,"UNFPA developed three tailored training modules for Bangladesh Police, midwives, and community-based health workers... to deliver mental health and psychosocial support (MHPSS) to survivors of GBV.","Evaluation Matrix based on findings.pdf, EQ1, Claim 5; EQ3, Claim 3; EQ6, Claim 6.1; EQ6, Claim 3"
-,"As a result of UNFPA's advocacy, Bangladesh Police and MoHFW agreed to integrate GBV modules into their regular training programmes.","Evaluation Matrix based on findings.pdf, EQ1, Claim 5; EQ3, Claim 3; EQ6, Claim 6.1; EQ6, Claim 3"
-,"Budget allocation is insufficient, leading to service gaps and reliance on short-term funding and community contributions. There is chronic underfunding for GBV prevention... and national stockouts of family planning commodities.","Evaluation Matrix based on findings.pdf, EQ5, Claim 10.4; EQ5, Claim 10.5"
-,"In the Rohingya community, UNFPA-supported partners use the Sasa approach for social mobilization, GBV prevention, and child marriage awareness, empowering women and engaging men.","Evaluation Matrix based on findings.pdf, EQ1, Claim 6; EQ4, Claim 2"
-,"Community mobilization efforts, using community health workers, raise awareness and facilitate referrals for maternal health services in hard-to-reach areas.","Evaluation Matrix based on findings.pdf, EQ1, Claim 7"
-,UNFPA supports policy dialogues with the Bangladesh Parliament Secretariat to advance gender dividends and the ICPD Programme of Action.,"Evaluation Matrix based on findings.pdf, EQ3, Claim 2; EQ3, Claim 4; EQ2, Claim 1"
-"Recommendation 8: In the next country programme cycle, strengthen institutional mechanisms and partnerships that promote adolescent and youth leadership, wellbeing, and participation as cross-cutting enablers of transformative results like norm shift accelerators for minimizing harmful practices. Building on successful initiatives such as youth helplines, menstrual health innovations, and SRHR integration in curricula, the programme should focus on scaling and sustaining systemic structures that enhance youth engagement, rights-based empowerment, and equitable access to opportunities across sectors. ","UNFPA facilities recorded 300,000 visits from adolescents last year, including repeated visits.","Evaluation Matrix based on findings.pdf, EQ5, Claim 10.3"
-,"Women and youth increasingly hold formal roles in district planning and humanitarian coordination (e.g., committee seats, co-facilitation of reviews), shifting participation toward meaningful leadership.","Evaluation Matrix based on findings.pdf, EQ5, Claim 10.3"
-,"UNFPA and partners actively involve vulnerable groups in program design and implementation at the community level. In Cox's Bazar, FGD with Youth groups co-design and lead research and projects related to climate change resilience and youth engagement.","Evaluation Matrix based on findings.pdf, EQ1, Claim 5; EQ1, Claim 7"
-,"Over 30 youth-led and women-led community-based organisations, and 150 girl activists across six districts were empowered to advocate against child marriage and promote gender equality.","Evaluation Matrix based on findings.pdf, EQ4, Claim 2"
-,Advocacy efforts led to the inclusion of 17 specific indicators for young people in the Intersector Needs Assessment for the Rohingya response.,"Evaluation Matrix based on findings.pdf, EQ1, Claim 5; EQ1, Claim 8; EQ3, Claim 2; EQ4, Claim 4"
-,"Remote island and hard-to-reach communities (e.g., Saint Martin’s, Kutubdia, Maheshkhali) remain underserved, and SRHR for LGBTQ+ populations needs more focus and intersectional understanding.","Evaluation Matrix based on findings.pdf, EQ1, Claim 11"
-,"All intervention taken by A&Y team was not mentioned in the TOC. For example integrating Sombhabona program with Jibikayon and VWB was not in TOC. However, keepin the theme of og outcome and intervention in mind, interventions have been adapted.","Evaluation Matrix based on findings.pdf, EQ2, Claim 4"
-"Recommendation 9: Going forward, and in anticipation of a new government, UNFPA should strengthen national ownership and institutional capacity to embed and sustain population and development initiatives and innovations within government systems. Building on the enhanced population and development focus of the new UNFPA Strategic Plan (2026–2029), the programme should reinforce the generation, analysis, and use of demographic evidence - including ageing, migration, and inequalities, particularly in the context of the country’s transition to middle-income status and the resulting emerging issues-to advance demographic resilience and inclusive, sustainable development. ",UNFPA successfully supported the Census 2022 and VAW Survey 2024 to gather disaggregated data on marginalized populations.,"Evaluation Matrix based on findings.pdf, EQ1, Claim 5; EQ3, Claim 6; EQ4, Claim 1"
-,"UNFPA supports the Sample Vital Registration System (SVRS), which provides a good number of SDGs indicators and monitors the 8th Five Years Plan.","Evaluation Matrix based on findings.pdf, EQ3, Claim 3; EQ3, Claim 6"
-,"UNFPA, jointly with the General Economics Division of Bangladesh Planning Commission, launched a brief called ‘Changing Population Dynamics of Bangladesh and Policy Actions to Realise the 1st and 2nd Demographic Dividend’.","Evaluation Matrix based on findings.pdf, EQ4, Claim 1"
-,UNFPA addresses the aging population megatrend by exploring geriatric care at the upazila level and integrating elderly care into midwife/nurse training.,"Evaluation Matrix based on findings.pdf, EQ2, Claim 1"
-,UNFPA contributed to the generation of evidence and knowledge management by strengthening national capacity to produce traditional census reports... and strengthening the quality of the sample-vital registration UNFPA Bangladesh 9th CPE system.,"Evaluation Matrix based on findings.pdf, EQ5, Claim 12.3"
-,"Population dynamics (ageing, migration, displacement) were not systematically linked to programmatic budget requirements and service planning.","Evaluation Matrix based on findings.pdf, EQ6, Claim 10"
-"Recommendation 10: Advocate structural solutions for long-term resilience and inclusion of crisis-affected populations by embedding SRHR/GBV within national DRR and development systems, securing multi-year, resilience-tagged budgets, and enforcing LNOB tracking to protect service continuity for both camp and host communities. ","The conceptualization, planning, and implementation of the Minimum Initial Service Package (MISP) for humanitarian response have not yet been fully integrated into routine government systems, and there is minimal government ownership and insufficient coordination between the Ministry of Health and Family Welfare (MoHFW) and the Ministry of Disaster Management and Relief.","Evaluation Matrix based on findings.pdf, EQ4, Claim 4"
-,"With UNFPA support, the Ministry of Health integrated the Minimum Initial Service Package (MISP) into the 5th Health Sector Operational Plan.","Evaluation Matrix based on findings.pdf, EQ1, Claim 6; EQ5, Claim 10.2"
-,"Resource distribution across thematic areas is uneven, with funding and staff concentrated in donor-priority districts and humanitarian hotspots, leading to inequitable access and variable implementation quality.","Evaluation Matrix based on findings.pdf, EQ1, Claim 9; EQ4, Claim 6"
-,"Crucially, comprehensive national monitoring of LNOB adherence is challenged by persistent data gaps for disaggregated information, particularly concerning persons with disabilities, in the national health information system (DHIS2).","Evaluation Matrix based on findings.pdf, EQ5, Claim 10.4; EQ5, Claim 11.4"
-,The Gender-based Violence Sub Sector and focal points developed a dashboard for real-time mapping and referral pathway sharing in refugee camps.,"Evaluation Matrix based on findings.pdf, EQ1, Claim 5; EQ3, Claim 3"
-,"UNFPA co-created a common beneficiary database with WFP, FAO, UNICEF, and Bangladesh Red Crescent Society for disaster response.","Evaluation Matrix based on findings.pdf, EQ1, Claim 6; EQ4, Claim 5"
-,"In 2022, 39 WFS provided GBV services to >311,000 women/girls, including >5,400 PWD—systematic disability tracking within humanitarian GBV services.","Evaluation Matrix based on findings.pdf, EQ5, Claim 11.1"
-"Recommendation 11. To enhance programme effectiveness and sustainability, UNFPA and national partners should strengthen governance, accountability, and quality assurance systems while advancing the systematic integration and use of quality data for evidence-based management. Building on existing national systems and digital platforms, the programme should promote unified and accessible data governance, institutionalized quality standards, and responsive monitoring mechanisms that connect service delivery, population intelligence, and policy action. These measures will reinforce transparency, improve performance management, and ensure that decisions are guided by timely and reliable evidence across all areas. ","Despite effective advocacy leading to the integration of some UNFPA priority indicators into the national health information system (DHIS2), a significant data gap persists, particularly concerning disaggregated data for persons with disabilities.","Evaluation Matrix based on findings.pdf, EQ3, Claim 3; EQ3, Claim 6; EQ4, Claim 1; EQ4, Claim 4"
-,"Fragmented data systems, especially for disability variables across health, GBV/police, and women’s affairs, impede triangulation and monitoring.","Evaluation Matrix based on findings.pdf, EQ4, Claim 5"
-,"UNFPA supported integration of SRHR indicators into DHIS2/Health Management Information System (HMIS): by 2024, 8 of 14 were fully integrated and reporting nationally.","Evaluation Matrix based on findings.pdf, EQ5, Claim 10.2; EQ5, Claim 10.6; EQ5, Claim 12.3"
-,"UNFPA supports the Sample Vital Registration System (SVRS), which provides a good number of SDGs indicators and monitors the 8th Five Years Plan.","Evaluation Matrix based on findings.pdf, EQ3, Claim 3; EQ3, Claim 6"
-,"MPDSR data, collected through DHIS-2, is used to identify maternal and neonatal mortality causes and inform response plans.","Evaluation Matrix based on findings.pdf, EQ3, Claim 3; EQ3, Claim 6; EQ4, Claim 1"
-,"UNFPA IPs often collect sex, age, and disability data for reporting, but lack the capacity to use this information for adaptive programming or resource targeting.","Evaluation Matrix based on findings.pdf, EQ1, Claim 9; EQ3, Claim 8; EQ3, Claim 2; EQ3, Claim 5; EQ4, Claim 6; EQ6, Claim 5; EQ6, Claim 6"
-,"UNFPA contributed 90% to midwifery policy documents, including national guidelines, SOPs, job descriptions, and deployment policies, crucial for both education and service delivery.","Evaluation Matrix based on findings.pdf, EQ3, Claim 5; EQ3, Claim 1; EQ3, Claim 3; EQ6, Claim 6.1; EQ4, Claim 3"
-        `;
-
-        /**
-         * A simple CSV parser to handle the document's specific format.
-         * This handles quoted fields and escaped quotes ("").
-         * @param {string} line - A single line from the CSV-like text.
-         * @returns {string[]} An array of field values.
-         */
-        function parseCsvLine(line) {
-            const parts = [];
-            let current = '';
-            let inQuote = false;
-            for (let i = 0; i < line.length; i++) {
-                const char = line[i];
-                if (char === '"') {
-                    if (inQuote && line[i + 1] === '"') {
-                        // This is an escaped quote ("")
-                        current += '"';
-                        i++; // Skip the next quote
-                    } else {
-                        // This is a regular quote, toggle the inQuote flag
-                        inQuote = !inQuote;
+        // Data structure for conclusions and recommendations
+        const triangulationData = [
+            {
+                id: "conclusion-1",
+                type: "conclusion",
+                number: 1,
+                title: "Conclusion 1",
+                description: "The current Programme achieved notable cross-area gains, such as the national Violence Against Women survey, stronger MISP preparedness, and improved quality standards. However, interlinkages between the four thematic Theories of Change were not explicit, and a structured, cross-area way of working was not fully established. Interlinkage among the TOCs could open up opportunities for more integrated programming, joint adaptation, cross-fertilization, innovation, monitoring, and the consistent application of equity considerations, mitigation of demographic and climate risks, and data governance. As a result, demonstrating combined contributions to outcomes and the three Transformative Results (3TRs) is more challenging. Joint UN programming and diversified partnerships added value in policy and delivery, especially in humanitarian settings.",
+                evidence: [
+                    {
+                        text: "The 10th Country Programme did not include a single Theory of Change, but four thematic Theories of Change. This has not facilitated systemic inter-area work but has reinforced intra-area focus.",
+                        source: "Evaluation Matrix based on findings.pdf, EQ2, Claim 2"
+                    },
+                    {
+                        text: "The absence of a unified ('umbrella') ToC has limited system-wide adaptive responses and joint monitoring across areas—highlighting a cross-area coordination issue to address in management responses.",
+                        source: "Evaluation Matrix based on findings.pdf, EQ2, Claim 2"
+                    },
+                    {
+                        text: "Lack of robust, documented cross-thematic integration in planning... integration is more ad hoc than systemic, particularly at sub-national levels.",
+                        source: "Evaluation Matrix based on findings.pdf, EQ3, Claim 7"
+                    },
+                    {
+                        text: "Operational collaboration is standard in the humanitarian response (Rohingya camps) but inconsistent outside crisis contexts and often project-specific, not a core operational norm.",
+                        source: "Evaluation Matrix based on findings.pdf, EQ3, Claim 7; EQ2, Claim 2"
+                    },
+                    {
+                        text: "Strategic platforms exist and facilitate dialogue, but budgetary/resource integration is weak; uneven resource distribution across thematic areas.",
+                        source: "Evaluation Matrix based on findings.pdf, EQ2, Claim 2; EQ3, Claim 7"
+                    },
+                    {
+                        text: "Over 38,000 women and girls were served at 92 police desks across 10 districts in 2023.",
+                        source: "Evaluation Matrix based on findings.pdf, EQ3, Claim 4"
+                    },
+                    {
+                        text: "In response to floods in Chattogram, UNFPA provided dignity kits, MHM kits, and baby kits to 12,000 women and 6,120 girls, including those with disabilities and transgender women.",
+                        source: "Evaluation Matrix based on findings.pdf, EQ1, Claim 4"
+                    },
+                    {
+                        text: "With UNFPA support, the Ministry of Health integrated the Minimum Initial Service Package (MISP) into the 5th Health Sector Operational Plan.",
+                        source: "Evaluation Matrix based on findings.pdf, EQ1, Claim 6; EQ5, Claim 10.2"
+                    },
+                    {
+                        text: "UNFPA successfully supported the Census 2022 and VAW Survey 2024 to gather disaggregated data on marginalized populations. The Census 2022 included questions specifically targeting Persons with Disabilities (POD) and transgender populations.",
+                        source: "Evaluation Matrix based on findings.pdf, EQ1, Claim 5; EQ3, Claim 6; EQ4, Claim 1"
+                    },
+                    {
+                        text: "The Gender-based Violence Sub Sector and focal points developed a dashboard for real-time mapping and referral pathway sharing in refugee camps.",
+                        source: "Evaluation Matrix based on findings.pdf, EQ1, Claim 5; EQ3, Claim 3"
+                    },
+                    {
+                        text: "UNFPA actively participated in and co-chaired the UN SDG data group and the UNSDCF Monitoring and Evaluation (M&E) working group in 2022 and 2023.",
+                        source: "Evaluation Matrix based on findings.pdf, EQ2, Claim 1; EQ4, Claim 5"
+                    },
+                    {
+                        text: "UNFPA led the GBV Sub-Sector, coordinating 67 partner organizations across 33 camps and 11 host communities to enhance interagency GBV case management and service coordination.",
+                        source: "Evaluation Matrix based on findings.pdf, EQ4, Claim 5"
+                    },
+                    {
+                        text: "UNFPA co-created a common beneficiary database with WFP, FAO, UNICEF, and Bangladesh Red Crescent Society for disaster response.",
+                        source: "Evaluation Matrix based on findings.pdf, EQ1, Claim 6; EQ4, Claim 5"
                     }
-                } else if (char === ',' && !inQuote) {
-                    // End of a field
-                    parts.push(current);
-                    current = '';
-                } else {
-                    // Part of a field
-                    current += char;
-                }
-            }
-            // Add the last part
-            parts.push(current);
-            
-            // Clean up: remove surrounding quotes from all parts
-            return parts.map(p => {
-                if (p.startsWith('"') && p.endsWith('"')) {
-                    return p.substring(1, p.length - 1).replace(/""/g, '"');
-                }
-                return p;
-            });
-        }
-
-        /**
-         * Parses the raw text data into a structured array of groups.
-         * @param {string} rawText - The full text from the document.
-         * @returns {Array<Object>} An array of group objects.
-         */
-        function parseData(rawText) {
-            const lines = rawText.split('\n').map(l => l.trim()).filter(Boolean);
-            const groups = [];
-            let currentGroup = null;
-
-            for (const line of lines) {
-                // Skip the header row
-                if (line.includes('"Conclusion / Recommendation"')) continue;
-
-                const parts = parseCsvLine(line);
-
-                if (parts.length < 2) continue; // Skip malformed lines
-
-                const title = parts[0];
-                const evidence = parts[1];
-                const source = parts[2] || "N/A";
-
-                if (title) {
-                    // This is a new group (Conclusion or Recommendation)
-                    currentGroup = {
-                        title: title,
-                        findings: []
-                    };
-                    if (evidence) { // Add the first finding
-                        currentGroup.findings.push({ evidence, source });
+                ]
+            },
+            {
+                id: "conclusion-2",
+                type: "conclusion",
+                number: 2,
+                title: "Conclusion 2",
+                description: "The LNOB principle was intentionally pursued through targeted actions focusing on marginalized groups and vulnerable districts, delivering notable localized gains. However, despite progress in advocating with the MoHFW, national routine health data systems (specifically the Government Health MIS) often lacked consistent disaggregation for key LNOB dimensions (particularly disability), limiting the ability to rigorously verify equity results at scale. Integration of LNOB approaches varied across settings and partners due to uneven capacities, leading to inconsistent uptake of gender equality, disability inclusion, and youth participation. Humanitarian responses showed stronger coherence than non-emergency contexts. National evidence generation improved, but weak interoperability and gaps in administrative data continued to make it difficult to show how program benefits were distributed across different LNOB groups (e.g., disproportionate benefits to ethnic minorities versus persons with disabilities).",
+                evidence: [
+                    {
+                        text: "The 10 priority districts for CP10 were selected through rigorous analysis by the M&E Unit of key indicators.",
+                        source: "Evaluation Matrix based on findings.pdf, EQ1, Claim 1"
+                    },
+                    {
+                        text: "UNFPA selects low-performing districts, considering marginalized groups, remoteness, and disability, for targeted support in maternal and child health.",
+                        source: "Evaluation Matrix based on findings.pdf, EQ1, Claim 1; EQ5, Claim 11.1"
+                    },
+                    {
+                        text: "The strategic focus on low-performing districts and vulnerable groups (including those facing geographical, economic, or cultural barriers, and persons with disabilities) for targeted support is highly relevant to achieving lagging SDG goals and 'leaving no one behind' (LNOB).",
+                        source: "Evaluation Matrix based on findings.pdf, EQ1, Claim 1"
+                    },
+                    {
+                        text: "To ensure the Leave No One Behind (LNOB) approach, UNFPA deployed midwives to the most marginalised indigenous communities, such as the Santal in Gaibandha.",
+                        source: "Evaluation Matrix based on findings.pdf, EQ1, Claim 1; EQ1, Claim 3"
+                    },
+                    {
+                        text: "The UNFPA-supported Census 2022 included questions specifically targeting vulnerable and marginalized groups, such as Persons with Disabilities (POD) and transgender populations, to generate disaggregated data.",
+                        source: "Evaluation Matrix based on findings.pdf, EQ1, Claim 3; EQ1, Claim 5; EQ3, Claim 3; EQ4, Claim 1"
+                    },
+                    {
+                        text: "A significant and persistent data gap exists for disaggregated data, particularly concerning persons with disabilities, which remains largely unavailable within the national health information system (DHIS2).",
+                        source: "Evaluation Matrix based on findings.pdf, EQ1, Claim 9; EQ1, Claim 12; EQ4, Claim 1; EQ4, Claim 3; EQ4, Claim 5; EQ6, Claim 6"
+                    },
+                    {
+                        text: "Despite effective advocacy leading to the integration of some UNFPA priority indicators into the national health information system (DHIS2), a significant data gap persists, particularly concerning disaggregated data for persons with disabilities.",
+                        source: "Evaluation Matrix based on findings.pdf, EQ3, Claim 3; EQ3, Claim 6; EQ4, Claim 1; EQ4, Claim 4"
+                    },
+                    {
+                        text: "Visibility for indigenous peoples, persons with disabilities, and transgender/gender-diverse people remains inconsistent, suggesting that progress is challenging.",
+                        source: "Evaluation Matrix based on findings.pdf, EQ1, Claim 11; EQ3, Claim 8; EQ4, Claim 3; EQ4, Claim 5"
+                    },
+                    {
+                        text: "UNFPA IPs often collect sex, age, and disability data for reporting, but lack the capacity to use this information for adaptive programming or resource targeting.",
+                        source: "Evaluation Matrix based on findings.pdf, EQ1, Claim 9; EQ3, Claim 8; EQ3, Claim 2; EQ3, Claim 5; EQ4, Claim 6; EQ6, Claim 5; EQ6, Claim 6"
+                    },
+                    {
+                        text: "A significant gap was noted where nearly zero percentage of staff in Women Friendly Spaces (WFS) received dedicated training on disability inclusion, which limits the effective uptake of services by women with disabilities.",
+                        source: "Evaluation Matrix based on findings.pdf, EQ1, Claim 10"
+                    },
+                    {
+                        text: "With the existing data, it is not possible to determine whether the most marginalized and vulnerable groups benefited the most from UNFPA interventions.",
+                        source: "Evaluation Matrix based on findings.pdf, EQ5, Claim 11.3"
+                    },
+                    {
+                        text: "Application of LNOB principle, cross-cutting approaches and data disaggregation by vulnerabilities is widespread but not yet systematic everywhere, and current data are insufficient to verify that LNOB groups benefited most.",
+                        source: "Evaluation Matrix based on findings.pdf, EQ5, Claim 11.6"
+                    },
+                    {
+                        text: "LNOB and other cross-cutting approaches are embedded in SOPs, planning tools, and supervision and are applied in most development and humanitarian interventions; however, consistent operationalization for persons with disabilities and other marginalized populations remains uneven across districts.",
+                        source: "Evaluation Matrix based on findings.pdf, EQ5, Claim 11.6"
                     }
-                    groups.push(currentGroup);
-                } else if (currentGroup && evidence) {
-                    // This is an additional finding for the current group
-                    currentGroup.findings.push({ evidence, source });
-                }
+                ]
+            },
+            {
+                id: "conclusion-3",
+                type: "conclusion",
+                number: 3,
+                title: "Conclusion 3",
+                description: "Strong strategic alignment with national and global priorities underpinned UNFPA's normative role, successfully translating evidence into national policies and standards. However, the sustained uptake of these specific policies and standards in routine practice and their consistent inclusion in multi-year government budgets and spending remained uneven, limiting the national scale and long-term durability of the change.",
+                evidence: [
+                    {
+                        text: "UNFPA programs are highly aligned with Bangladesh's national SDG goals, targets, and operational plans for health, child health, SRHR, and gender-based violence.",
+                        source: "Evaluation Matrix based on findings.pdf, EQ1, Claim 8; EQ3, Claim 1; EQ2, Claim 1"
+                    },
+                    {
+                        text: "The 10th Country Program (2022-2026) aims to contribute to the three transformative results (reduction of maternal mortality, unmet need for family planning, and gender-based violence/child marriage).",
+                        source: "Evaluation Matrix based on findings.pdf, EQ1, Claim 1; EQ1, Claim 8"
+                    },
+                    {
+                        text: "CP (SRHR) is aligned with national policies including i) National Population Policy ; ii) 4th Health and Population and Nutrition Sector Program (HPNSP); iii) Government's Commitment on FP2030; iv) 8th Five Year Pan ; v) 8th Five Year Plan ; vi) The UNDSCF and viii) The SDGs.",
+                        source: "Evaluation Matrix based on findings.pdf, EQ1, Claim 8; EQ3, Claim 4"
+                    },
+                    {
+                        text: "UNFPA provided technical assistance to the Ministry of Health and Family Welfare (MoHFW) for updating the National Population Policy 2012, shifting its focus from population control to population management in line with SDGs, ICPD PoA, Perspective Plan (2041), and the Delta Plan (2100).",
+                        source: "Evaluation Matrix based on findings.pdf, EQ3, Claim 4; EQ3, Claim 5; EQ3, Claim 1; EQ6, Claim 6.1"
+                    },
+                    {
+                        text: "The first ever Bangladesh National Family Planning Strategy (2023-2030) was formulated by the Ministry of Health and Family Welfare with support from UNFPA.",
+                        source: "Evaluation Matrix based on findings.pdf, EQ3, Claim 5; EQ3, Claim 3; EQ6, Claim 6.1; EQ4, Claim 1"
+                    },
+                    {
+                        text: "UNFPA contributed 90% to midwifery policy documents, including national guidelines, SOPs, job descriptions, and deployment policies, crucial for both education and service delivery.",
+                        source: "Evaluation Matrix based on findings.pdf, EQ3, Claim 5; EQ3, Claim 1; EQ3, Claim 3; EQ6, Claim 6.1; EQ4, Claim 3"
+                    },
+                    {
+                        text: "The Labor Room Protocol, a 'significant' third edition developed with UNFPA's assistance, aims to significantly reduce maternal and infant mortality upon implementation.",
+                        source: "Evaluation Matrix based on findings.pdf, EQ1, Claim 6; EQ1, Claim 8; EQ3, Claim 1; EQ3, Claim 3; EQ6, Claim 6.1"
+                    },
+                    {
+                        text: "Policy formulation is strong, but enforcement and systems are weak. Chronic stock-outs of commodities, legal barriers to staff recruitment, and loopholes in child marriage law persist.",
+                        source: "Evaluation Matrix based on findings.pdf, EQ6, Claim 4; EQ5, Claim 10.4"
+                    },
+                    {
+                        text: "The DGHS Official points to a significant shortage of skilled human resources at the field level (half-empty) as a major bottleneck, hindering the scale-up of quality services.",
+                        source: "Evaluation Matrix based on findings.pdf, EQ1, Claim 9; EQ3, Claim 2; EQ3, Claim 6; EQ6, Claim 2; EQ6, Claim 4"
+                    },
+                    {
+                        text: "The DGNM trains midwives but lacks control over service delivery infrastructure (DG Health controls the 'house'). This creates a big integration issue that needs to be thought about at the Ministry level.",
+                        source: "Evaluation Matrix based on findings.pdf, EQ1, Claim 9; EQ3, Claim 7; EQ3, Claim 5; EQ6, Claim 2; EQ6, Claim 4"
+                    },
+                    {
+                        text: "Only 2,500 midwives have been deployed in the last 10 years, drastically short of the 22,000 target by 2030, limiting service delivery impact.",
+                        source: "Evaluation Matrix based on findings.pdf, EQ3, Claim 8; EQ3, Claim 6; EQ6, Claim 2; EQ5, Claim 10.4"
+                    }
+                ]
+            },
+            {
+                id: "conclusion-4",
+                type: "conclusion",
+                number: 4,
+                title: "Conclusion 4",
+                description: "Sustainability and the shift from project-based funding to diversified, domestically anchored financing have advanced but remain fragile. Institutionalization is visible in standards and system use, yet continuity is vulnerable where public financing is inconsistent, execution lags persist, and equity-related costs are not routinely tracked and protected.",
+                evidence: [
+                    {
+                        text: "The shift from funding to financing is evident, as the government is increasingly taking financial ownership, now covering midwifery student stipends and internship allowances from its revenue fund.",
+                        source: "Evaluation Matrix based on findings.pdf, EQ5, Claim 10.1; EQ5, Claim 12.1"
+                    },
+                    {
+                        text: "UNFPA explicitly designs interventions as pilots, expecting the government to scale them up into national Development Project Proposals.",
+                        source: "Evaluation Matrix based on findings.pdf, EQ5, Claim 10.1; EQ5, Claim 12.1"
+                    },
+                    {
+                        text: "The Komolful Pharmacy initiative is designed as a self-sustaining business model, aiming for long-term viability without external funding.",
+                        source: "Evaluation Matrix based on findings.pdf, EQ4, Claim 4; EQ4, Claim 2; EQ5, Claim 12.6"
+                    },
+                    {
+                        text: "Fistula and MPDSR programs rely heavily on UNFPA's limited internal funds and grants, facing significant funding gaps due to low donor interest.",
+                        source: "Evaluation Matrix based on findings.pdf, EQ3, Claim 6"
+                    },
+                    {
+                        text: "The Sapmara project in the Shantaal community, which significantly increased institutional deliveries, faces severe doubt about its sustainability as it ends in December 2025.",
+                        source: "Evaluation Matrix based on findings.pdf, EQ3, Claim 6; EQ6, Claim 2"
+                    },
+                    {
+                        text: "Budget allocation is insufficient, leading to service gaps and reliance on short-term funding and community contributions. There is chronic underfunding for GBV prevention... and national stockouts of family planning commodities.",
+                        source: "Evaluation Matrix based on findings.pdf, EQ5, Claim 10.4"
+                    },
+                    {
+                        text: "The absence of an approved government Operation Plan causes critical shortages of essential medicines and logistics in the field.",
+                        source: "Evaluation Matrix based on findings.pdf, EQ1, Claim 9; EQ3, Claim 6; EQ6, Claim 2; EQ6, Claim 5"
+                    },
+                    {
+                        text: "Resource distribution across thematic areas is uneven, with funding and staff concentrated in donor-priority districts and humanitarian hotspots, leading to inequitable access and variable implementation quality.",
+                        source: "Evaluation Matrix based on findings.pdf, EQ1, Claim 9; EQ4, Claim 6"
+                    },
+                    {
+                        text: "Execution gaps in budget performance, HR/logistics and uneven subnational capacity slow translation from policy to practice...",
+                        source: "Evaluation Matrix based on findings.pdf, EQ5, Claim 10.4"
+                    },
+                    {
+                        text: "Crucially, comprehensive national monitoring of LNOB adherence is challenged by persistent data gaps for disaggregated information, particularly concerning persons with disabilities, in the national health information system (DHIS2).",
+                        source: "Evaluation Matrix based on findings.pdf, EQ5, Claim 10.4; EQ5, Claim 11.4"
+                    }
+                ]
+            },
+            {
+                id: "conclusion-5",
+                type: "conclusion",
+                number: 5,
+                title: "Conclusion 5",
+                description: "Innovation is a clear comparative advantage for UNFPA, successfully accelerating progress (e.g., Komolful Pharmacy, Block-chain, WHDs). However, this success is not yet systematic: it is not consistently embedded in the Programme's strategic positioning. System-wide adoption is held back by project fragmentation and the absence of a structured pathway, requiring clear policy uptake, dedicated funding, transition of successful pilots to replication and government budget inclusion.",
+                evidence: [
+                    {
+                        text: "UNFPA launched a partnership with Zaynax Health, Impact Hub Dhaka, Gram Unnayan Karma, and ToguMogu to expand access to sexual and reproductive health and family planning services for women by offering training and mentorship to woman pharmacist entrepreneurs.",
+                        source: "Evaluation Matrix based on findings.pdf, EQ4, Claim 4; EQ4, Claim 2"
+                    },
+                    {
+                        text: "The Komolful Pharmacy initiative is designed as a self-sustaining business model, aiming for long-term viability without external funding.",
+                        source: "Evaluation Matrix based on findings.pdf, EQ4, Claim 4; EQ4, Claim 2; EQ5, Claim 12.6"
+                    },
+                    {
+                        text: "WFP, FAO, and UNFPA are using blockchain to reach low-income women in the urban slums with food aid and information about menstrual health management and gender-based violence.",
+                        source: "Evaluation Matrix based on findings.pdf, EQ4, Claim 4; EQ4, Claim 3"
+                    },
+                    {
+                        text: "UNFPA set up and supported a total of 120 facilities, including 27 Women's Help Desks at Police Stations.",
+                        source: "Evaluation Matrix based on findings.pdf, EQ3, Claim 4"
+                    },
+                    {
+                        text: "UNFPA works in urban slums, providing midwife-led care, contraceptives, and using a mobile app (Ma-Jaan) for emergency referrals to address difficult SRHR access.",
+                        source: "Evaluation Matrix based on findings.pdf, EQ1, Claim 4"
+                    },
+                    {
+                        text: "The lack of a clear plan for government takeover and sustainability of donor-supported programs once funding ends creates 'big gaps' and service discontinuation.",
+                        source: "Evaluation Matrix based on findings.pdf, EQ6, Claim 4"
+                    },
+                    {
+                        text: "Strategic platforms exist and facilitate dialogue, but budgetary/resource integration is weak; uneven resource distribution across thematic areas.",
+                        source: "Evaluation Matrix based on findings.pdf, EQ2, Claim 2; EQ3, Claim 7"
+                    },
+                    {
+                        text: "All intervention taken by A&Y team was not mentioned in the TOC. For example integrating Sombhabona program with Jibikayon and VWB was not in TOC. However, keeping the theme of og outcome and intervention in mind, interventions have been adapted.",
+                        source: "Evaluation Matrix based on findings.pdf, EQ2, Claim 4"
+                    }
+                ]
+            },
+            {
+                id: "conclusion-6",
+                type: "conclusion",
+                number: 6,
+                title: "Conclusion 6",
+                description: "Integration of megatrends (such as climate change and aging populations) is successful in localized pilots but remains unsystematic due to the absence of institutional mechanisms. While progress is visible in specific initiatives, the necessary anticipation and adaptation (i.e., forward-looking risk-informed strategic framework and adjustments) are not consistently applied across thematic areas or system levels to institutionalize the megatrends across all routine programming.",
+                evidence: [
+                    {
+                        text: "UNFPA integrates climate change issues into training and services, responding to the megatrend and its impact on vulnerable communities.",
+                        source: "Evaluation Matrix based on findings.pdf, EQ2, Claim 1"
+                    },
+                    {
+                        text: "The DGNM integrates climate change issues and care for persons with disabilities and the elderly into midwifery and nursing training programs.",
+                        source: "Evaluation Matrix based on findings.pdf, EQ1, Claim 6"
+                    },
+                    {
+                        text: "UNFPA addresses the aging population megatrend by exploring geriatric care at the upazila level and integrating elderly care into midwife/nurse training.",
+                        source: "Evaluation Matrix based on findings.pdf, EQ2, Claim 1"
+                    },
+                    {
+                        text: "UNFPA developed training modules on climate change and SRHR for healthcare providers, integrating it into the midwifery curriculum.",
+                        source: "Evaluation Matrix based on findings.pdf, EQ1, Claim 6"
+                    },
+                    {
+                        text: "The program includes MISP for disaster situations and works with vulnerable, disaster-prone groups in areas like Sunamganj and Cox's Bazar.",
+                        source: "Evaluation Matrix based on findings.pdf, EQ1, Claim 1; EQ1, Claim 6"
+                    },
+                    {
+                        text: "UNFPA distributed dignity kits to vulnerable families in flood-prone districts as anticipatory disaster relief.",
+                        source: "Evaluation Matrix based on findings.pdf, EQ1, Claim 1; EQ1, Claim 6"
+                    },
+                    {
+                        text: "Evidence of ToCs directly driving field-level adaptation to all megatrends is limited, with climate and migration addressed more superficially than gender and youth.",
+                        source: "Evaluation Matrix based on findings.pdf, EQ4, Claim 3"
+                    },
+                    {
+                        text: "Resource distribution across thematic areas is uneven, with funding and staff concentrated in donor-priority districts and humanitarian hotspots, leading to inequitable access and variable implementation quality.",
+                        source: "Evaluation Matrix based on findings.pdf, EQ1, Claim 9; EQ4, Claim 6"
+                    },
+                    {
+                        text: "The M&E system could be more geared towards the assessment of results for vulnerable groups, including disaggregation of data by sex, age and province/district. This seems to be a weak area needing some attention to achieve 'no one left behind' objectives by 2030.",
+                        source: "Evaluation Matrix based on findings.pdf, EQ1, Claim 12; EQ2, Claim 2; EQ4, Claim 5; EQ4, Claim 6; EQ6, Claim 6"
+                    }
+                ]
+            },
+            {
+                id: "conclusion-7",
+                type: "conclusion",
+                number: 7,
+                title: "Conclusion 7",
+                description: "Delivery stayed resilient during shocks through agile resequencing and flexible resource use. However, chronic execution bottlenecks undermined timeliness, cost-efficiency, and equity, especially in hard-to-reach districts. Stop-start delivery, late-year spending spikes, and uneven subnational performance persisted where approval, cash, and supply-chain dissonance were unresolved.",
+                evidence: [
+                    {
+                        text: "Issues include limited availability of reproductive services in disaster-prone coastal areas and vulnerable housing.",
+                        source: "Evaluation Matrix based on findings.pdf, EQ1, Claim 1"
+                    },
+                    {
+                        text: "UNFPA distributed dignity kits to vulnerable families in flood-prone districts as anticipatory disaster relief.",
+                        source: "Evaluation Matrix based on findings.pdf, EQ1, Claim 1; EQ1, Claim 6"
+                    },
+                    {
+                        text: "In response to floods in Chattogram, UNFPA provided dignity kits, MHM kits, and baby kits to 12,000 women and 6,120 girls, including those with disabilities and transgender women.",
+                        source: "Evaluation Matrix based on findings.pdf, EQ1, Claim 4"
+                    },
+                    {
+                        text: "The absence of an approved government Operation Plan causes critical shortages of essential medicines and logistics in the field.",
+                        source: "Evaluation Matrix based on findings.pdf, EQ1, Claim 9; EQ3, Claim 6; EQ6, Claim 2; EQ6, Claim 5"
+                    },
+                    {
+                        text: "Chronic stock-outs of commodities, legal barriers to staff recruitment, and loopholes in child marriage law (e.g., fake birth certificates, unregistered marriages) persist.",
+                        source: "Evaluation Matrix based on findings.pdf, EQ1, Claim 9; EQ6, Claim 4; EQ5, Claim 10.4"
+                    },
+                    {
+                        text: "Remote island and hard-to-reach communities (e.g., Saint Martin's, Kutubdia, Maheshkhali) remain underserved.",
+                        source: "Evaluation Matrix based on findings.pdf, EQ1, Claim 11; EQ3, Claim 8; EQ4, Claim 3; EQ6, Claim 2"
+                    },
+                    {
+                        text: "The operations team reported that midwifery deployment is taking place... but challenges in retaining midwives at the field level persist, alongside under-resourcing for essential services and delays in the procurement of programme supplies.",
+                        source: "Evaluation Matrix based on findings.pdf, EQ5, Claim 10.5; EQ5, Claim 12.4"
+                    },
+                    {
+                        text: "Due to the bureaucratic process in approving the Government's Technical Assistance Project Proposal (TAPP), the CO could not sign workplans with some government IPs.",
+                        source: "Evaluation Matrix based on findings.pdf, EQ5, Claim 10.4"
+                    }
+                ]
+            },
+            {
+                id: "conclusion-8",
+                type: "conclusion",
+                number: 8,
+                title: "Conclusion 8",
+                description: "UNFPA-supported midwifery and maternal health models deliver effective, high-quality care and provide a credible national normative model. However, scaling these models to routine national coverage is constrained by human-resource shortfalls and subnational capacity gaps.",
+                evidence: [
+                    {
+                        text: "UNFPA significantly supports midwifery, a government priority for achieving SDG targets for maternal and newborn mortality and making SRHR services available.",
+                        source: "Evaluation Matrix based on findings.pdf, EQ1, Claim 8; EQ3, Claim 1"
+                    },
+                    {
+                        text: "UNFPA has trained and licensed a total of 7520 ICM standard midwives.",
+                        source: "Evaluation Matrix based on findings.pdf, EQ3, Claim 4; EQ5, Claim 12.1"
+                    },
+                    {
+                        text: "Midwives assisted in the delivery of 81% of sub-district hospital births in 2022, compared to 24–35% in 2018.",
+                        source: "Evaluation Matrix based on findings.pdf, EQ3, Claim 4; EQ5, Claim 10.3"
+                    },
+                    {
+                        text: "Only 2,500 midwives have been deployed in the last 10 years, drastically short of the 22,000 target by 2030, limiting service delivery impact.",
+                        source: "Evaluation Matrix based on findings.pdf, EQ3, Claim 8; EQ3, Claim 6; EQ6, Claim 2; EQ5, Claim 10.4; EQ5, Claim 12.5"
+                    },
+                    {
+                        text: "The DGHS Official points to a significant shortage of skilled human resources at the field level (half-empty) as a major bottleneck, hindering the scale-up of quality services.",
+                        source: "Evaluation Matrix based on findings.pdf, EQ1, Claim 9; EQ3, Claim 2; EQ3, Claim 6; EQ6, Claim 2; EQ6, Claim 4"
+                    },
+                    {
+                        text: "The DGNM trains midwives but lacks control over service delivery infrastructure (DG Health controls the 'house'). This creates a big integration issue that needs to be thought about at the Ministry level.",
+                        source: "Evaluation Matrix based on findings.pdf, EQ1, Claim 9; EQ3, Claim 7; EQ3, Claim 5; EQ6, Claim 2; EQ6, Claim 4"
+                    },
+                    {
+                        text: "Even where midwives are deployed in Union Sub-Centers, lack of proper infrastructure and logistics prevents them from working effectively.",
+                        source: "Evaluation Matrix based on findings.pdf, EQ5, Claim 10.4; EQ5, Claim 12.5"
+                    },
+                    {
+                        text: "The closure of 43 BRAC midwifery centers due to lack of government registration highlights a disconnect between service provision and regulatory compliance.",
+                        source: "Evaluation Matrix based on findings.pdf, EQ1, Claim 9"
+                    },
+                    {
+                        text: "UNFPA contributed 90% to midwifery policy documents, including national guidelines, SOPs, job descriptions, and deployment policies, crucial for both education and service delivery.",
+                        source: "Evaluation Matrix based on findings.pdf, EQ3, Claim 5; EQ3, Claim 1; EQ3, Claim 3; EQ6, Claim 6.1; EQ4, Claim 3"
+                    }
+                ]
+            },
+            {
+                id: "conclusion-9",
+                type: "conclusion",
+                number: 9,
+                title: "Conclusion 9",
+                description: "GBV service models are effective and survivor-centred, backed by a stronger evidence base and policy gains. However, continuity and completion were limited by funding shortfalls and weak anchoring in domestic budgets.",
+                evidence: [
+                    {
+                        text: "UNFPA enhanced survivor-centered services by increasing the number of facilities providing GBV response from 0 in 2021 to 143 in 2023.",
+                        source: "Evaluation Matrix based on findings.pdf, EQ5, Claim 10.1; EQ5, Claim 10.3"
+                    },
+                    {
+                        text: "UNFPA set up and supported a total of 120 facilities, including 27 Women's Help Desks at Police Stations.",
+                        source: "Evaluation Matrix based on findings.pdf, EQ3, Claim 4"
+                    },
+                    {
+                        text: "UNFPA successfully supported the Census 2022 and VAW Survey 2024 to gather disaggregated data on marginalized populations.",
+                        source: "Evaluation Matrix based on findings.pdf, EQ1, Claim 5; EQ3, Claim 6; EQ4, Claim 1"
+                    },
+                    {
+                        text: "UNFPA supported the Ministry of Women and Children Affairs (MoWCA) in leading several important law reform processes to address violence against women and girls (e.g., amendment of the Domestic Violence Act).",
+                        source: "Evaluation Matrix based on findings.pdf, EQ3, Claim 5; EQ6, Claim 6.1; EQ4, Claim 3"
+                    },
+                    {
+                        text: "UNFPA supported the development of a National Guideline for the Prevention of Son Preference and Gender Biased Sex Selection.",
+                        source: "Evaluation Matrix based on findings.pdf, EQ4, Claim 3"
+                    },
+                    {
+                        text: "Budget allocation is insufficient, leading to service gaps and reliance on short-term funding and community contributions. There is chronic underfunding for GBV prevention... and national stockouts of family planning commodities.",
+                        source: "Evaluation Matrix based on findings.pdf, EQ5, Claim 10.4; EQ5, Claim 10.5"
+                    },
+                    {
+                        text: "Standard Operating Procedures (SOPs) for medico-legal services for Gender-Based Violence (GBV) survivors were developed and integrated across health care tiers.",
+                        source: "Evaluation Matrix based on findings.pdf, EQ5, Claim 10.6; EQ5, Claim 12.2"
+                    },
+                    {
+                        text: "The UNFPA and Health Economics Unit collaboratively developed a Standard Operating Procedure (SOP) for providing medico-legal services to Gender Based Violence (GBV) survivors.",
+                        source: "Evaluation Matrix based on findings.pdf, EQ5, Claim 10.2; EQ5, Claim 12.2"
+                    }
+                ]
+            },
+            {
+                id: "conclusion-10",
+                type: "conclusion",
+                number: 10,
+                title: "Conclusion 10",
+                description: "High-quality data and demographic intelligence were produced but were under-used in budgeting and decentralized planning, limiting equity-focused resource allocation and risk-informed delivery.",
+                evidence: [
+                    {
+                        text: "UNFPA successfully supported the Census 2022 and VAW Survey 2024 to gather disaggregated data on marginalized populations.",
+                        source: "Evaluation Matrix based on findings.pdf, EQ1, Claim 5; EQ3, Claim 6; EQ4, Claim 1"
+                    },
+                    {
+                        text: "The SVRS system collects data on disability, and initiated capturing the ethnic status of the household members since 2021. (Note: While collected, this is separate from routine health systems like DHIS2, supporting the routine limitation claim.)",
+                        source: "Evaluation Matrix based on findings.pdf, EQ4, Claim 5; EQ1, Claim 12"
+                    },
+                    {
+                        text: "UNFPA is developing a Logistics Management Information System (LMIS) to improve supply chain in five priority districts, enhancing resource use.",
+                        source: "Evaluation Matrix based on findings.pdf, EQ1, Claim 1; EQ1, Claim 5; EQ3, Claim 3; EQ3, Claim 6"
+                    },
+                    {
+                        text: "UNFPA IPs often collect sex, age, and disability data for reporting, but lack the capacity to use this information for adaptive programming or resource targeting.",
+                        source: "Evaluation Matrix based on findings.pdf, EQ1, Claim 9; EQ3, Claim 8; EQ3, Claim 2; EQ3, Claim 5; EQ4, Claim 6; EQ6, Claim 5; EQ6, Claim 6"
+                    },
+                    {
+                        text: "Resource distribution across thematic areas is uneven, with funding and staff concentrated in donor-priority districts and humanitarian hotspots, leading to inequitable access and variable implementation quality.",
+                        source: "Evaluation Matrix based on findings.pdf, EQ1, Claim 9; EQ4, Claim 6"
+                    },
+                    {
+                        text: "The M&E system could be more geared towards the assessment of results for vulnerable groups, including disaggregation of data by sex, age and province/district.",
+                        source: "Evaluation Matrix based on findings.pdf, EQ1, Claim 12; EQ2, Claim 2; EQ4, Claim 5; EQ4, Claim 6; EQ6, Claim 6"
+                    },
+                    {
+                        text: "DHIS2 integration and district-facing dashboards shortened feedback loops and informed supervision; managers call district SRHR officers 'very instrumental… data updated… great impact,' indicating uptake.",
+                        source: "Evaluation Matrix based on findings.pdf, EQ5, Claim 12.3"
+                    },
+                    {
+                        text: "Progressive DHIS2 integration and district-facing visualization tools have shortened feedback loops, enabling supervisors to spot equity gaps and course-correct within planning cycles.",
+                        source: "Evaluation Matrix based on findings.pdf, EQ5, Claim 12.3"
+                    },
+                    {
+                        text: "The Programme operationalized a financing lens (costed notes, joint indicators, sector/budget dialogues, IFI/private outreach); in early 2025 an investment case completed on child marriage.",
+                        source: "Evaluation Matrix based on findings.pdf, EQ5, Claim 12.6"
+                    }
+                ]
+            },
+            {
+                id: "conclusion-11",
+                type: "conclusion",
+                number: 11,
+                title: "Conclusion 11",
+                description: "For adolescents and youth, system-based, collaborative, and innovative approaches show promise for wellbeing and empowerment. However, inclusion and sustainability remain inconsistent.",
+                evidence: [
+                    {
+                        text: "All intervention taken by A&Y team was not mentioned in the TOC. For example integrating Sombhabona program with Jibikayon and VWB was not in TOC. However, keeping the theme of og outcome and intervention in mind, interventions have been adapted.",
+                        source: "Evaluation Matrix based on findings.pdf, EQ2, Claim 4"
+                    },
+                    {
+                        text: "Advocacy efforts led to the inclusion of 17 specific indicators for young people in the Intersector Needs Assessment for the Rohingya response.",
+                        source: "Evaluation Matrix based on findings.pdf, EQ1, Claim 5; EQ1, Claim 8; EQ3, Claim 2; EQ4, Claim 4"
+                    },
+                    {
+                        text: "UNFPA facilities recorded 300,000 visits from adolescents last year, including repeated visits.",
+                        source: "Evaluation Matrix based on findings.pdf, EQ5, Claim 10.3"
+                    },
+                    {
+                        text: "UNFPA collaborated with UNICEF in the curriculum development on Adolescent health and wellbeing with both technical and financial support.",
+                        source: "Evaluation Matrix based on findings.pdf, EQ4, Claim 5"
+                    },
+                    {
+                        text: "In the Rohingya community, UNFPA-supported partners use the Sasa approach for social mobilization, GBV prevention, and child marriage awareness, empowering women and engaging men.",
+                        source: "Evaluation Matrix based on findings.pdf, EQ1, Claim 6; EQ4, Claim 2"
+                    },
+                    {
+                        text: "UNFPA launched a partnership with Zaynax Health, Impact Hub Dhaka, Gram Unnayan Karma, and ToguMogu to expand access to sexual and reproductive health and family planning services for women by offering training and mentorship to woman pharmacist entrepreneurs.",
+                        source: "Evaluation Matrix based on findings.pdf, EQ4, Claim 4; EQ4, Claim 2"
+                    },
+                    {
+                        text: "Remote island and hard-to-reach communities (e.g., Saint Martin's, Kutubdia, Maheshkhali) remain underserved, and SRHR for LGBTQ+ populations needs more focus and intersectional understanding.",
+                        source: "Evaluation Matrix based on findings.pdf, EQ1, Claim 11"
+                    },
+                    {
+                        text: "Only 3.1% of riverine-displaced women received continuum of maternal care, compared to nearly 27% in non-displaced areas.",
+                        source: "Evaluation Matrix based on findings.pdf, EQ1, Claim 11; EQ3, Claim 8"
+                    },
+                    {
+                        text: "Over 80% of transgender/gender diverse populations experience third-party violence, highlighting a severe protection gap.",
+                        source: "Evaluation Matrix based on findings.pdf, EQ1, Claim 11"
+                    }
+                ]
+            },
+            {
+                id: "conclusion-12",
+                type: "conclusion",
+                number: 12,
+                title: "Conclusion 12",
+                description: "The Humanitarian–Development–Peace nexus operates effectively in Cox's Bazar, linking life-saving services with medium-term integration and supporting social resilience. However, durable resilience remains structurally constrained and fiscally vulnerable.",
+                evidence: [
+                    {
+                        text: "Operational collaboration is standard in the humanitarian response (Rohingya camps) but inconsistent outside crisis contexts and often project-specific, not a core operational norm.",
+                        source: "Evaluation Matrix based on findings.pdf, EQ3, Claim 7; EQ2, Claim 2"
+                    },
+                    {
+                        text: "The Gender-based Violence Sub Sector and focal points developed a dashboard for real-time mapping and referral pathway sharing in refugee camps.",
+                        source: "Evaluation Matrix based on findings.pdf, EQ1, Claim 5; EQ3, Claim 3"
+                    },
+                    {
+                        text: "In the Rohingya community, UNFPA-supported partners use the Sasa approach for social mobilization, GBV prevention, and child marriage awareness, empowering women and engaging men.",
+                        source: "Evaluation Matrix based on findings.pdf, EQ1, Claim 6; EQ4, Claim 2"
+                    },
+                    {
+                        text: "With UNFPA support, the Ministry of Health integrated the Minimum Initial Service Package (MISP) into the 5th Health Sector Operational Plan.",
+                        source: "Evaluation Matrix based on findings.pdf, EQ1, Claim 6; EQ5, Claim 10.2"
+                    },
+                    {
+                        text: "UNFPA's Rohingya response prioritizes gender-based violence (GBV), SRHR, and adolescent/youth services for women, girls, and young people in camps and host communities.",
+                        source: "Evaluation Matrix based on findings.pdf, EQ5, Claim 11.2"
+                    },
+                    {
+                        text: "Over 326,000 women and girls, including over 3,900 persons with disabilities, accessed GBV prevention and response services via UNFPA-supported women-friendly spaces in Cox's Bazar in 2023.",
+                        source: "Evaluation Matrix based on findings.pdf, EQ5, Claim 11.1"
+                    },
+                    {
+                        text: "In 2022, 39 WFS provided GBV services to >311,000 women/girls, including >5,400 PWD—systematic disability tracking within humanitarian GBV services.",
+                        source: "Evaluation Matrix based on findings.pdf, EQ5, Claim 11.1"
+                    },
+                    {
+                        text: "UNFPA co-created a common beneficiary database with WFP, FAO, UNICEF, and Bangladesh Red Crescent Society for disaster response.",
+                        source: "Evaluation Matrix based on findings.pdf, EQ1, Claim 6; EQ4, Claim 5"
+                    },
+                    {
+                        text: "Crucially, comprehensive national monitoring of LNOB adherence is challenged by persistent data gaps for disaggregated information, particularly concerning persons with disabilities, in the national health information system (DHIS2).",
+                        source: "Evaluation Matrix based on findings.pdf, EQ5, Claim 10.4; EQ5, Claim 11.4"
+                    },
+                    {
+                        text: "The conceptualization, planning, and implementation of the Minimum Initial Service Package (MISP) for humanitarian response have not yet been fully integrated into routine government systems, and there is minimal government ownership and insufficient coordination between the Ministry of Health and Family Welfare (MoHFW) and the Ministry of Disaster Management and Relief.",
+                        source: "Evaluation Matrix based on findings.pdf, EQ4, Claim 4"
+                    }
+                ]
+            },
+            {
+                id: "recommendation-1",
+                type: "recommendation",
+                number: 1,
+                title: "Recommendation 1",
+                description: "In the next country programme cycle, strengthen the strategic and system-change focus of the programme, guided by three interconnected Theories of Change based on the three transformative results (3TRs) and aligned with the UNFPA Strategic Plan 2026–2029, including its six outputs, three intermediate outcomes, and four overall outcomes. The programme should be grounded in UNFPA's comparative advantage and value added in the country, reinforce an integrated approach, mainstream climate and environmental responsiveness, respond to demographic changes, systematically prioritize the poorest and most vulnerable populations and those furthest left behind, and deepen partnerships both within and beyond the UN system.",
+                evidence: [
+                    {
+                        text: "The 10th Country Programme did not include a single Theory of Change, but four thematic Theories of Change. This has not facilitated systemic inter-area work but has reinforced intra-area focus.",
+                        source: "Evaluation Matrix based on findings.pdf, EQ2, Claim 2"
+                    },
+                    {
+                        text: "The absence of a unified ('umbrella') ToC has limited system-wide adaptive responses and joint monitoring across areas—highlighting a cross-area coordination issue to address in management responses.",
+                        source: "Evaluation Matrix based on findings.pdf, EQ2, Claim 2"
+                    },
+                    {
+                        text: "Lack of robust, documented cross-thematic integration in planning... integration is more ad hoc than systemic, particularly at sub-national levels.",
+                        source: "Evaluation Matrix based on findings.pdf, EQ3, Claim 7"
+                    },
+                    {
+                        text: "Operational collaboration is standard in the humanitarian response (Rohingya camps) but inconsistent outside crisis contexts and often project-specific, not a core operational norm.",
+                        source: "Evaluation Matrix based on findings.pdf, EQ3, Claim 7; EQ2, Claim 2"
+                    },
+                    {
+                        text: "Strategic platforms exist and facilitate dialogue, but budgetary/resource integration is weak; uneven resource distribution across thematic areas.",
+                        source: "Evaluation Matrix based on findings.pdf, EQ2, Claim 2; EQ3, Claim 7"
+                    },
+                    {
+                        text: "Application of LNOB principle, cross-cutting approaches and data disaggregation by vulnerabilities is widespread but not yet systematic everywhere, and current data are insufficient to verify that LNOB groups benefited most.",
+                        source: "Evaluation Matrix based on findings.pdf, EQ5, Claim 11.6"
+                    },
+                    {
+                        text: "Evidence of ToCs directly driving field-level adaptation to all megatrends is limited, with climate and migration addressed more superficially than gender and youth.",
+                        source: "Evaluation Matrix based on findings.pdf, EQ4, Claim 3"
+                    },
+                    {
+                        text: "UNFPA IPs often collect sex, age, and disability data for reporting, but lack the capacity to use this information for adaptive programming or resource targeting.",
+                        source: "Evaluation Matrix based on findings.pdf, EQ1, Claim 9; EQ3, Claim 8; EQ3, Claim 2; EQ3, Claim 5; EQ4, Claim 6; EQ6, Claim 5; EQ6, Claim 6"
+                    }
+                ]
+            },
+            {
+                id: "recommendation-2",
+                type: "recommendation",
+                number: 2,
+                title: "Recommendation 2",
+                description: "Looking ahead, the new country programme needs to strengthen the sustainability, predictability, and national ownership of financing by accelerating the transition from short-term, project-based support to diversified and nationally embedded financing mechanisms. UNFPA should promote the establishment of sustainable national compacts integrated into government budgets and Medium-Term Expenditure Frameworks (MTEFs), linking demographic intelligence and evidence generation to fiscal policy, budgeting, and resource allocation. The programme should also invest in testing, refining, and scaling sustainable innovations, and expand public–private partnerships to enhance long-term sustainability and impact.",
+                evidence: [
+                    {
+                        text: "The shift from funding to financing is evident, as the government is increasingly taking financial ownership, now covering midwifery student stipends and internship allowances from its revenue fund.",
+                        source: "Evaluation Matrix based on findings.pdf, EQ5, Claim 10.1; EQ5, Claim 12.1"
+                    },
+                    {
+                        text: "The Komolful Pharmacy initiative is designed as a self-sustaining business model, aiming for long-term viability without external funding.",
+                        source: "Evaluation Matrix based on findings.pdf, EQ4, Claim 4; EQ4, Claim 2; EQ5, Claim 12.6"
+                    },
+                    {
+                        text: "UNFPA explicitly designs interventions as pilots, expecting the government to scale them up into national Development Project Proposals.",
+                        source: "Evaluation Matrix based on findings.pdf, EQ5, Claim 10.1; EQ5, Claim 12.1"
+                    },
+                    {
+                        text: "Lack of involvement of private sectors to deliver FP services and need for more initiatives for mainstreaming the private sectors with the routine system.",
+                        source: "Evaluation Matrix based on findings.pdf, EQ4, Claim 4; EQ4, Claim 2"
+                    },
+                    {
+                        text: "The lack of a clear plan for government takeover and sustainability of donor-supported programs once funding ends creates 'big gaps' and service discontinuation.",
+                        source: "Evaluation Matrix based on findings.pdf, EQ6, Claim 4"
+                    },
+                    {
+                        text: "Fistula and MPDSR programs rely heavily on UNFPA's limited internal funds and grants, facing significant funding gaps due to low donor interest.",
+                        source: "Evaluation Matrix based on findings.pdf, EQ3, Claim 6"
+                    },
+                    {
+                        text: "Resource distribution across thematic areas is uneven, with funding and staff concentrated in donor-priority districts and humanitarian hotspots, leading to inequitable access and variable implementation quality.",
+                        source: "Evaluation Matrix based on findings.pdf, EQ1, Claim 9; EQ4, Claim 6"
+                    },
+                    {
+                        text: "UNFPA, jointly with the General Economics Division of Bangladesh Planning Commission, launched a brief called 'Changing Population Dynamics of Bangladesh and Policy Actions to Realise the 1st and 2nd Demographic Dividend'.",
+                        source: "Evaluation Matrix based on findings.pdf, EQ4, Claim 1"
+                    },
+                    {
+                        text: "The Programme operationalized a financing lens (costed notes, joint indicators, sector/budget dialogues, IFI/private outreach); in early 2025 an investment case completed on child marriage.",
+                        source: "Evaluation Matrix based on findings.pdf, EQ5, Claim 12.6"
+                    },
+                    {
+                        text: "UNFPA supported the Ministry of Women and Children Affairs (MoWCA) in developing a costed monitoring and evaluation framework for the National Action Plan on Violence Against Women (NAP-VAW).",
+                        source: "Evaluation Matrix based on findings.pdf, EQ3, Claim 3; EQ4, Claim 3"
+                    }
+                ]
+            },
+            {
+                id: "recommendation-3",
+                type: "recommendation",
+                number: 3,
+                title: "Recommendation 3",
+                description: "The next country programme needs to strengthen and standardize the cross-cutting implementation of the Leave No One Behind (LNOB) principle to ensure that equity and inclusion are systematically applied across all programme areas and that inequalities are effectively addressed in the context of the country's transition to middle-income status. The programme should institutionalize LNOB as a core programming standard, supported by a clear pathway, methodology, and accountability framework for its operationalization. Implementation effectiveness should be consistently guided by disaggregated data on reach and results, and by participatory approaches that promote the inclusion of women, adolescents, persons with disabilities, ethnic minorities, and other marginalized and most vulnerable population groups, while enhancing institutional capacities to sustain equitable and inclusive outcomes.",
+                evidence: [
+                    {
+                        text: "A shared pathway or methodology for LNOB implementation is not in place, and measurement remains the Achilles' heel.",
+                        source: "Evaluation Matrix based on findings.pdf, EQ5, Claim 11.4"
+                    },
+                    {
+                        text: "Application of LNOB principle, cross-cutting approaches and data disaggregation by vulnerabilities is widespread but not yet systematic everywhere, and current data are insufficient to verify that LNOB groups benefited most.",
+                        source: "Evaluation Matrix based on findings.pdf, EQ5, Claim 11.6"
+                    },
+                    {
+                        text: "UNFPA IPs often collect sex, age, and disability data for reporting, but lack the capacity to use this information for adaptive programming or resource targeting.",
+                        source: "Evaluation Matrix based on findings.pdf, EQ1, Claim 9; EQ3, Claim 8; EQ3, Claim 2; EQ3, Claim 5; EQ4, Claim 6; EQ6, Claim 5; EQ6, Claim 6"
+                    },
+                    {
+                        text: "A significant and persistent data gap exists for disaggregated data, particularly concerning persons with disabilities, which remains largely unavailable within the national health information system (DHIS2).",
+                        source: "Evaluation Matrix based on findings.pdf, EQ1, Claim 9; EQ1, Claim 12; EQ4, Claim 1; EQ4, Claim 3; EQ4, Claim 5; EQ6, Claim 6"
+                    },
+                    {
+                        text: "Mechanisms to include people with disabilities are not fully effective: while reserved seats on committees exist, these individuals often remain excluded from actual decision-making.",
+                        source: "Evaluation Matrix based on findings.pdf, EQ1, Claim 9; EQ4, Claim 3"
+                    },
+                    {
+                        text: "UNFPA and partners actively involve vulnerable groups in program design and implementation at the community level. In Cox's Bazar, FGD with Youth groups co-design and lead research and projects.",
+                        source: "Evaluation Matrix based on findings.pdf, EQ1, Claim 5; EQ1, Claim 7"
+                    },
+                    {
+                        text: "To ensure the Leave No One Behind (LNOB) approach, UNFPA deployed midwives to the most marginalised indigenous communities, such as the Santal in Gaibandha.",
+                        source: "Evaluation Matrix based on findings.pdf, EQ1, Claim 1; EQ1, Claim 3"
+                    }
+                ]
+            },
+            {
+                id: "recommendation-4",
+                type: "recommendation",
+                number: 4,
+                title: "Recommendation 4",
+                description: "In the next country programme cycle, UNFPA needs to further strengthen and institutionalize innovation, scaling, and knowledge management to enhance sustainability and accelerate impact, building on existing innovations and learning. The programme should reinforce UNFPA's positioning and communication as a future-oriented, evidence-driven agency, fostering an innovation culture and integrating innovative practices across all programme areas. UNFPA should also promote the sharing and adaptation of proven models and approaches through south–south collaboration and knowledge exchange to expand reach and replicate successful solutions.",
+                evidence: [
+                    {
+                        text: "The lack of a clear plan for government takeover and sustainability of donor-supported programs once funding ends creates 'big gaps' and service discontinuation.",
+                        source: "Evaluation Matrix based on findings.pdf, EQ6, Claim 4"
+                    },
+                    {
+                        text: "UNFPA explicitly designs interventions as pilots, expecting the government to scale them up into national Development Project Proposals.",
+                        source: "Evaluation Matrix based on findings.pdf, EQ5, Claim 10.1; EQ5, Claim 12.1"
+                    },
+                    {
+                        text: "WFP, FAO, and UNFPA are using blockchain to reach low-income women in the urban slums with food aid and information about menstrual health management and gender-based violence.",
+                        source: "Evaluation Matrix based on findings.pdf, EQ4, Claim 4; EQ4, Claim 3"
+                    },
+                    {
+                        text: "UNFPA launched a partnership with Zaynax Health, Impact Hub Dhaka, Gram Unnayan Karma, and ToguMogu to expand access to sexual and reproductive health and family planning services for women by offering training and mentorship to woman pharmacist entrepreneurs.",
+                        source: "Evaluation Matrix based on findings.pdf, EQ4, Claim 4; EQ4, Claim 2"
+                    },
+                    {
+                        text: "The Komolful Pharmacy initiative is designed as a self-sustaining business model, aiming for long-term viability without external funding.",
+                        source: "Evaluation Matrix based on findings.pdf, EQ4, Claim 4; EQ4, Claim 2; EQ5, Claim 12.6"
+                    },
+                    {
+                        text: "A digital monitoring tool for FP in the garment sector was launched, providing real-time data to improve service delivery efficiency.",
+                        source: "Evaluation Matrix based on findings.pdf, EQ3, Claim 3; EQ5, Claim 12.3"
+                    }
+                ]
+            },
+            {
+                id: "recommendation-5",
+                type: "recommendation",
+                number: 5,
+                title: "Recommendation 5",
+                description: "Going forward, UNFPA and partners should enhance national capacity for demographic foresight to anticipate and respond to population dynamics in the context of climate change, migration, urbanization, and other emerging megatrends. Building on existing analytical and planning tools, the programme should promote forward-looking, risk-informed approaches that connect population evidence with adaptive governance and policy planning. Strengthening these systems will enable more resilient, equitable, and rights-based responses across the humanitarian–development–peace nexus.",
+                evidence: [
+                    {
+                        text: "UNFPA addresses the aging population megatrend by exploring geriatric care at the upazila level and integrating elderly care into midwife/nurse training.",
+                        source: "Evaluation Matrix based on findings.pdf, EQ2, Claim 1"
+                    },
+                    {
+                        text: "UNFPA integrates climate change issues into training and services, responding to the megatrend and its impact on vulnerable communities.",
+                        source: "Evaluation Matrix based on findings.pdf, EQ2, Claim 1"
+                    },
+                    {
+                        text: "UNFPA developed training modules on climate change and SRHR for healthcare providers, integrating it into the midwifery curriculum.",
+                        source: "Evaluation Matrix based on findings.pdf, EQ1, Claim 6"
+                    },
+                    {
+                        text: "The program includes MISP for disaster situations and works with vulnerable, disaster-prone groups in areas like Sunamganj and Cox's Bazar.",
+                        source: "Evaluation Matrix based on findings.pdf, EQ1, Claim 1; EQ1, Claim 6"
+                    },
+                    {
+                        text: "Evidence of ToCs directly driving field-level adaptation to all megatrends is limited, with climate and migration addressed more superficially than gender and youth.",
+                        source: "Evaluation Matrix based on findings.pdf, EQ4, Claim 3"
+                    },
+                    {
+                        text: "Population dynamics (ageing, migration, displacement) were not systematically linked to programmatic budget requirements and service planning. Consequently, risk-informed, whole-of-portfolio adjustments, i.e., formal strategic changes in UNFPA's internal budget allocation and external policy advocacy, were sporadic rather than routine.",
+                        source: "Evaluation Matrix based on findings.pdf, EQ6, Claim 10"
+                    },
+                    {
+                        text: "UNFPA, jointly with the General Economics Division of Bangladesh Planning Commission, launched a brief called 'Changing Population Dynamics of Bangladesh and Policy Actions to Realise the 1st and 2nd Demographic Dividend'.",
+                        source: "Evaluation Matrix based on findings.pdf, EQ4, Claim 1"
+                    },
+                    {
+                        text: "UNFPA took the lead in revising the National Adaptation Plan for Health for Bangladesh in 2023, collaborating with MOHFW, WHO, and UNICEF.",
+                        source: "Evaluation Matrix based on findings.pdf, EQ3, Claim 5; EQ5, Claim 12.2"
+                    }
+                ]
+            },
+            {
+                id: "recommendation-6",
+                type: "recommendation",
+                number: 6,
+                title: "Recommendation 6",
+                description: "In the next country programme cycle, strengthen and expand sexual and reproductive health (SRH) systems and service delivery to ensure equitable access and quality of care. The programme should build on proven models and successful UNFPA-supported approaches to institutionalize quality assurance mechanisms, address systemic bottlenecks in service coverage, human resources, and data systems, and advance universal access to comprehensive, rights-based SRH services.",
+                evidence: [
+                    {
+                        text: "Midwives assisted in the delivery of 81% of sub-district hospital births in 2022, compared to 24–35% in 2018.",
+                        source: "Evaluation Matrix based on findings.pdf, EQ3, Claim 4; EQ5, Claim 10.3"
+                    },
+                    {
+                        text: "The 'Santal Help Project' increased institutional deliveries in the Shantaal community from 0% to 24%, building trust and providing free services.",
+                        source: "Evaluation Matrix based on findings.pdf, EQ4, Claim 1; EQ5, Claim 10.3; EQ5, Claim 11.1"
+                    },
+                    {
+                        text: "Only 2,500 midwives have been deployed in the last 10 years, drastically short of the 22,000 target by 2030, limiting service delivery impact.",
+                        source: "Evaluation Matrix based on findings.pdf, EQ3, Claim 8; EQ3, Claim 6; EQ6, Claim 2; EQ5, Claim 10.4; EQ5, Claim 12.5"
+                    },
+                    {
+                        text: "The DGHS Official points to a significant shortage of skilled human resources at the field level (half-empty) as a major bottleneck, hindering the scale-up of quality services.",
+                        source: "Evaluation Matrix based on findings.pdf, EQ1, Claim 9; EQ3, Claim 2; EQ3, Claim 6; EQ6, Claim 2; EQ6, Claim 4"
+                    },
+                    {
+                        text: "The DGNM trains midwives but lacks control over service delivery infrastructure (DG Health controls the 'house'). This creates a big integration issue that needs to be thought about at the Ministry level.",
+                        source: "Evaluation Matrix based on findings.pdf, EQ1, Claim 9; EQ3, Claim 7; EQ3, Claim 5; EQ6, Claim 2; EQ6, Claim 4"
+                    },
+                    {
+                        text: "UNFPA is supporting the development of a digital referral system and mobile medical teams to reach hard-to-reach populations, including those in coastal, char, and haor areas, and urban slums.",
+                        source: "Evaluation Matrix based on findings.pdf, EQ1, Claim 1; EQ1, Claim 6"
+                    },
+                    {
+                        text: "UNFPA supported nine priority districts to begin implementation of Maternal and Perinatal Death Surveillance and Response.",
+                        source: "Evaluation Matrix based on findings.pdf, EQ1, Claim 1; EQ3, Claim 1"
+                    },
+                    {
+                        text: "UNFPA supported integration of SRHR indicators into DHIS2/Health Management Information System (HMIS): by 2024, 8 of 14 were fully integrated and reporting nationally.",
+                        source: "Evaluation Matrix based on findings.pdf, EQ5, Claim 10.2; EQ5, Claim 10.6; EQ5, Claim 12.3"
+                    }
+                ]
+            },
+            {
+                id: "recommendation-7",
+                type: "recommendation",
+                number: 7,
+                title: "Recommendation 7",
+                description: "Going forward, strengthen gender equality and protection systems by scaling up proven survivor-centred models, advancing social and behaviour change, and ensuring sustainable financing and coordination across sectors. The programme should deepen partnerships and reinforce national ownership to sustain gender-transformative results for women and girls.",
+                evidence: [
+                    {
+                        text: "UNFPA enhanced survivor-centered services by increasing the number of facilities providing GBV response from 0 in 2021 to 143 in 2023.",
+                        source: "Evaluation Matrix based on findings.pdf, EQ5, Claim 10.1; EQ5, Claim 10.3"
+                    },
+                    {
+                        text: "UNFPA set up and supported a total of 120 facilities, including 27 Women's Help Desks at Police Stations.",
+                        source: "Evaluation Matrix based on findings.pdf, EQ3, Claim 4"
+                    },
+                    {
+                        text: "UNFPA developed three tailored training modules for Bangladesh Police, midwives, and community-based health workers... to deliver mental health and psychosocial support (MHPSS) to survivors of GBV.",
+                        source: "Evaluation Matrix based on findings.pdf, EQ1, Claim 5; EQ3, Claim 3; EQ6, Claim 6.1; EQ6, Claim 3"
+                    },
+                    {
+                        text: "As a result of UNFPA's advocacy, Bangladesh Police and MoHFW agreed to integrate GBV modules into their regular training programmes.",
+                        source: "Evaluation Matrix based on findings.pdf, EQ1, Claim 5; EQ3, Claim 3; EQ6, Claim 6.1; EQ6, Claim 3"
+                    },
+                    {
+                        text: "Budget allocation is insufficient, leading to service gaps and reliance on short-term funding and community contributions. There is chronic underfunding for GBV prevention... and national stockouts of family planning commodities.",
+                        source: "Evaluation Matrix based on findings.pdf, EQ5, Claim 10.4; EQ5, Claim 10.5"
+                    },
+                    {
+                        text: "In the Rohingya community, UNFPA-supported partners use the Sasa approach for social mobilization, GBV prevention, and child marriage awareness, empowering women and engaging men.",
+                        source: "Evaluation Matrix based on findings.pdf, EQ1, Claim 6; EQ4, Claim 2"
+                    },
+                    {
+                        text: "Community mobilization efforts, using community health workers, raise awareness and facilitate referrals for maternal health services in hard-to-reach areas.",
+                        source: "Evaluation Matrix based on findings.pdf, EQ1, Claim 7"
+                    },
+                    {
+                        text: "UNFPA supports policy dialogues with the Bangladesh Parliament Secretariat to advance gender dividends and the ICPD Programme of Action.",
+                        source: "Evaluation Matrix based on findings.pdf, EQ3, Claim 2; EQ3, Claim 4; EQ2, Claim 1"
+                    }
+                ]
+            },
+            {
+                id: "recommendation-8",
+                type: "recommendation",
+                number: 8,
+                title: "Recommendation 8",
+                description: "In the next country programme cycle, strengthen institutional mechanisms and partnerships that promote adolescent and youth leadership, wellbeing, and participation as cross-cutting enablers of transformative results like norm shift accelerators for minimizing harmful practices. Building on successful initiatives such as youth helplines, menstrual health innovations, and SRHR integration in curricula, the programme should focus on scaling and sustaining systemic structures that enhance youth engagement, rights-based empowerment, and equitable access to opportunities across sectors.",
+                evidence: [
+                    {
+                        text: "UNFPA facilities recorded 300,000 visits from adolescents last year, including repeated visits.",
+                        source: "Evaluation Matrix based on findings.pdf, EQ5, Claim 10.3"
+                    },
+                    {
+                        text: "Women and youth increasingly hold formal roles in district planning and humanitarian coordination (e.g., committee seats, co-facilitation of reviews), shifting participation toward meaningful leadership.",
+                        source: "Evaluation Matrix based on findings.pdf, EQ5, Claim 10.3"
+                    },
+                    {
+                        text: "UNFPA and partners actively involve vulnerable groups in program design and implementation at the community level. In Cox's Bazar, FGD with Youth groups co-design and lead research and projects related to climate change resilience and youth engagement.",
+                        source: "Evaluation Matrix based on findings.pdf, EQ1, Claim 5; EQ1, Claim 7"
+                    },
+                    {
+                        text: "Over 30 youth-led and women-led community-based organisations, and 150 girl activists across six districts were empowered to advocate against child marriage and promote gender equality.",
+                        source: "Evaluation Matrix based on findings.pdf, EQ4, Claim 2"
+                    },
+                    {
+                        text: "Advocacy efforts led to the inclusion of 17 specific indicators for young people in the Intersector Needs Assessment for the Rohingya response.",
+                        source: "Evaluation Matrix based on findings.pdf, EQ1, Claim 5; EQ1, Claim 8; EQ3, Claim 2; EQ4, Claim 4"
+                    },
+                    {
+                        text: "Remote island and hard-to-reach communities (e.g., Saint Martin's, Kutubdia, Maheshkhali) remain underserved, and SRHR for LGBTQ+ populations needs more focus and intersectional understanding.",
+                        source: "Evaluation Matrix based on findings.pdf, EQ1, Claim 11"
+                    },
+                    {
+                        text: "All intervention taken by A&Y team was not mentioned in the TOC. For example integrating Sombhabona program with Jibikayon and VWB was not in TOC. However, keeping the theme of og outcome and intervention in mind, interventions have been adapted.",
+                        source: "Evaluation Matrix based on findings.pdf, EQ2, Claim 4"
+                    }
+                ]
+            },
+            {
+                id: "recommendation-9",
+                type: "recommendation",
+                number: 9,
+                title: "Recommendation 9",
+                description: "Going forward, and in anticipation of a new government, UNFPA should strengthen national ownership and institutional capacity to embed and sustain population and development initiatives and innovations within government systems. Building on the enhanced population and development focus of the new UNFPA Strategic Plan (2026–2029), the programme should reinforce the generation, analysis, and use of demographic evidence - including ageing, migration, and inequalities, particularly in the context of the country's transition to middle-income status and the resulting emerging issues-to advance demographic resilience and inclusive, sustainable development.",
+                evidence: [
+                    {
+                        text: "UNFPA successfully supported the Census 2022 and VAW Survey 2024 to gather disaggregated data on marginalized populations.",
+                        source: "Evaluation Matrix based on findings.pdf, EQ1, Claim 5; EQ3, Claim 6; EQ4, Claim 1"
+                    },
+                    {
+                        text: "UNFPA supports the Sample Vital Registration System (SVRS), which provides a good number of SDGs indicators and monitors the 8th Five Years Plan.",
+                        source: "Evaluation Matrix based on findings.pdf, EQ3, Claim 3; EQ3, Claim 6"
+                    },
+                    {
+                        text: "UNFPA, jointly with the General Economics Division of Bangladesh Planning Commission, launched a brief called 'Changing Population Dynamics of Bangladesh and Policy Actions to Realise the 1st and 2nd Demographic Dividend'.",
+                        source: "Evaluation Matrix based on findings.pdf, EQ4, Claim 1"
+                    },
+                    {
+                        text: "UNFPA addresses the aging population megatrend by exploring geriatric care at the upazila level and integrating elderly care into midwife/nurse training.",
+                        source: "Evaluation Matrix based on findings.pdf, EQ2, Claim 1"
+                    },
+                    {
+                        text: "UNFPA contributed to the generation of evidence and knowledge management by strengthening national capacity to produce traditional census reports... and strengthening the quality of the sample-vital registration UNFPA Bangladesh 9th CPE system.",
+                        source: "Evaluation Matrix based on findings.pdf, EQ5, Claim 12.3"
+                    },
+                    {
+                        text: "Population dynamics (ageing, migration, displacement) were not systematically linked to programmatic budget requirements and service planning.",
+                        source: "Evaluation Matrix based on findings.pdf, EQ6, Claim 10"
+                    }
+                ]
+            },
+            {
+                id: "recommendation-10",
+                type: "recommendation",
+                number: 10,
+                title: "Recommendation 10",
+                description: "Advocate structural solutions for long-term resilience and inclusion of crisis-affected populations by embedding SRHR/GBV within national DRR and development systems, securing multi-year, resilience-tagged budgets, and enforcing LNOB tracking to protect service continuity for both camp and host communities.",
+                evidence: [
+                    {
+                        text: "The conceptualization, planning, and implementation of the Minimum Initial Service Package (MISP) for humanitarian response have not yet been fully integrated into routine government systems, and there is minimal government ownership and insufficient coordination between the Ministry of Health and Family Welfare (MoHFW) and the Ministry of Disaster Management and Relief.",
+                        source: "Evaluation Matrix based on findings.pdf, EQ4, Claim 4"
+                    },
+                    {
+                        text: "With UNFPA support, the Ministry of Health integrated the Minimum Initial Service Package (MISP) into the 5th Health Sector Operational Plan.",
+                        source: "Evaluation Matrix based on findings.pdf, EQ1, Claim 6; EQ5, Claim 10.2"
+                    },
+                    {
+                        text: "Resource distribution across thematic areas is uneven, with funding and staff concentrated in donor-priority districts and humanitarian hotspots, leading to inequitable access and variable implementation quality.",
+                        source: "Evaluation Matrix based on findings.pdf, EQ1, Claim 9; EQ4, Claim 6"
+                    },
+                    {
+                        text: "Crucially, comprehensive national monitoring of LNOB adherence is challenged by persistent data gaps for disaggregated information, particularly concerning persons with disabilities, in the national health information system (DHIS2).",
+                        source: "Evaluation Matrix based on findings.pdf, EQ5, Claim 10.4; EQ5, Claim 11.4"
+                    },
+                    {
+                        text: "The Gender-based Violence Sub Sector and focal points developed a dashboard for real-time mapping and referral pathway sharing in refugee camps.",
+                        source: "Evaluation Matrix based on findings.pdf, EQ1, Claim 5; EQ3, Claim 3"
+                    },
+                    {
+                        text: "UNFPA co-created a common beneficiary database with WFP, FAO, UNICEF, and Bangladesh Red Crescent Society for disaster response.",
+                        source: "Evaluation Matrix based on findings.pdf, EQ1, Claim 6; EQ4, Claim 5"
+                    },
+                    {
+                        text: "In 2022, 39 WFS provided GBV services to >311,000 women/girls, including >5,400 PWD—systematic disability tracking within humanitarian GBV services.",
+                        source: "Evaluation Matrix based on findings.pdf, EQ5, Claim 11.1"
+                    }
+                ]
+            },
+            {
+                id: "recommendation-11",
+                type: "recommendation",
+                number: 11,
+                title: "Recommendation 11",
+                description: "To enhance programme effectiveness and sustainability, UNFPA and national partners should strengthen governance, accountability, and quality assurance systems while advancing the systematic integration and use of quality data for evidence-based management. Building on existing national systems and digital platforms, the programme should promote unified and accessible data governance, institutionalized quality standards, and responsive monitoring mechanisms that connect service delivery, population intelligence, and policy action. These measures will reinforce transparency, improve performance management, and ensure that decisions are guided by timely and reliable evidence across all areas.",
+                evidence: [
+                    {
+                        text: "Despite effective advocacy leading to the integration of some UNFPA priority indicators into the national health information system (DHIS2), a significant data gap persists, particularly concerning disaggregated data for persons with disabilities.",
+                        source: "Evaluation Matrix based on findings.pdf, EQ3, Claim 3; EQ3, Claim 6; EQ4, Claim 1; EQ4, Claim 4"
+                    },
+                    {
+                        text: "Fragmented data systems, especially for disability variables across health, GBV/police, and women's affairs, impede triangulation and monitoring.",
+                        source: "Evaluation Matrix based on findings.pdf, EQ4, Claim 5"
+                    },
+                    {
+                        text: "UNFPA supported integration of SRHR indicators into DHIS2/Health Management Information System (HMIS): by 2024, 8 of 14 were fully integrated and reporting nationally.",
+                        source: "Evaluation Matrix based on findings.pdf, EQ5, Claim 10.2; EQ5, Claim 10.6; EQ5, Claim 12.3"
+                    },
+                    {
+                        text: "UNFPA supports the Sample Vital Registration System (SVRS), which provides a good number of SDGs indicators and monitors the 8th Five Years Plan.",
+                        source: "Evaluation Matrix based on findings.pdf, EQ3, Claim 3; EQ3, Claim 6"
+                    },
+                    {
+                        text: "MPDSR data, collected through DHIS-2, is used to identify maternal and neonatal mortality causes and inform response plans.",
+                        source: "Evaluation Matrix based on findings.pdf, EQ3, Claim 3; EQ3, Claim 6; EQ4, Claim 1"
+                    },
+                    {
+                        text: "UNFPA IPs often collect sex, age, and disability data for reporting, but lack the capacity to use this information for adaptive programming or resource targeting.",
+                        source: "Evaluation Matrix based on findings.pdf, EQ1, Claim 9; EQ3, Claim 8; EQ3, Claim 2; EQ3, Claim 5; EQ4, Claim 6; EQ6, Claim 5; EQ6, Claim 6"
+                    },
+                    {
+                        text: "UNFPA contributed 90% to midwifery policy documents, including national guidelines, SOPs, job descriptions, and deployment policies, crucial for both education and service delivery.",
+                        source: "Evaluation Matrix based on findings.pdf, EQ3, Claim 5; EQ3, Claim 1; EQ3, Claim 3; EQ6, Claim 6.1; EQ4, Claim 3"
+                    }
+                ]
             }
-            return groups;
-        }
+        ];
 
-        /**
-         * Renders the structured data into HTML and injects it into the page.
-         * @param {Array<Object>} groups - The parsed data.
-         */
-        function renderAccordion(groups) {
-            const container = document.getElementById('accordion-container');
-            if (!container) return;
-
-            let html = '';
-            groups.forEach((group, index) => {
-                // Determine if it's a Conclusion or Recommendation for styling
-                const isConclusion = group.title.startsWith('Conclusion');
-                const titleColor = isConclusion ? 'text-blue-700' : 'text-green-700';
-                const ringColor = isConclusion ? 'focus:ring-blue-300' : 'focus:ring-green-300';
-                
-                let findingsHtml = '<ul class="space-y-5">';
-                group.findings.forEach(finding => {
-                    findingsHtml += `
-                        <li class="pb-5 border-b border-gray-200 last:border-b-0">
-                            <p class="text-gray-700">${finding.evidence}</p>
-                            <p class="text-sm text-gray-500 italic mt-2">
-                                <span class="font-medium">Source:</span> ${finding.source}
-                            </p>
-                        </li>
-                    `;
-                });
-                findingsHtml += '</ul>';
-
-                html += `
-                    <div class="accordion-item bg-white rounded-lg shadow-md border border-gray-200 overflow-hidden">
-                        <!-- Accordion Header -->
-                        <button class="accordion-header w-full text-left p-5 md:p-6 flex justify-between items-center bg-gray-50 hover:bg-gray-100 transition duration-150 focus:outline-none focus:ring-2 ${ringColor}">
-                            <h2 class="text-lg md:text-xl font-semibold ${titleColor}">${group.title}</h2>
-                            <span class="accordion-icon text-2xl text-gray-500 transform">
-                                <!-- Chevron Down SVG -->
-                                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 transition-transform duration-300" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" /></svg>
-                            </span>
-                        </button>
-                        <!-- Accordion Content -->
-                        <div class="accordion-content bg-white border-t border-gray-200">
-                            ${findingsHtml}
-                        </div>
-                    </div>
-                `;
-            });
-
-            container.innerHTML = html;
-        }
-
-        /**
-         * Toggles a single accordion panel.
-         * @param {Element} header - The header element that was clicked.
-         * @param {boolean} [forceOpen] - Optional: true to force open, false to force close.
-         */
-        function togglePanel(header, forceOpen = null) {
-            const content = header.nextElementSibling;
-            const icon = header.querySelector('.accordion-icon svg');
-            
-            let isOpen = content.classList.contains('open');
-            if (forceOpen !== null) {
-                isOpen = !forceOpen; // If forcing open, we act as if it's currently closed
-            }
-
-            if (isOpen) {
-                content.classList.remove('open');
-                icon.classList.remove('rotate-180');
-            } else {
-                content.classList.add('open');
-                icon.classList.add('rotate-180');
-            }
-        }
-
-
-        /**
-         * Adds click event listeners to all accordion items.
-         */
-        function addAccordionListeners() {
-            const container = document.getElementById('accordion-container');
-            
-            container.addEventListener('click', function(e) {
-                const header = e.target.closest('.accordion-header');
-                if (header) {
-                    togglePanel(header);
-                }
-            });
-
-            // --- Controls Listeners ---
-            document.getElementById('expand-all').addEventListener('click', () => {
-                document.querySelectorAll('.accordion-header').forEach(header => {
-                    togglePanel(header, true); // Force open
-                });
-            });
-
-            document.getElementById('collapse-all').addEventListener('click', () => {
-                document.querySelectorAll('.accordion-header').forEach(header => {
-                    togglePanel(header, false); // Force close
-                });
-            });
-        }
-
-        // --- Run on page load ---
-        document.addEventListener('DOMContentLoaded', () => {
-            try {
-                const data = parseData(rawTextData);
-                renderAccordion(data);
-                addAccordionListeners();
-            } catch (error) {
-                console.error("Failed to parse or render data:", error);
-                document.getElementById('accordion-container').innerHTML = 
-                    '<div class="text-center text-red-500 p-10">Error loading data. Please check console.</div>';
-            }
+        // Initialize the page
+        document.addEventListener('DOMContentLoaded', function() {
+            updateStats();
+            initializeFilters();
+            renderCards(triangulationData);
+            setupEventListeners();
         });
 
-    </script>
+        // Update statistics
+        function updateStats() {
+            const conclusionsCount = triangulationData.filter(item => item.type === 'conclusion').length;
+            const recommendationsCount = triangulationData.filter(item => item.type === 'recommendation').length;
+            const evidenceCount = triangulationData.reduce((total, item) => total + item.evidence.length, 0);
+            
+            document.getElementById('conclusionsCount').textContent = conclusionsCount;
+            document.getElementById('recommendationsCount').textContent = recommendationsCount;
+            document.getElementById('evidenceCount').textContent = evidenceCount;
+        }
 
+        // Initialize filter options
+        function initializeFilters() {
+            const numberFilter = document.getElementById('numberFilter');
+            
+            // Get unique numbers from data
+            const numbers = [...new Set(triangulationData.map(item => item.number))].sort((a, b) => a - b);
+            
+            // Add options for each number
+            numbers.forEach(number => {
+                const option = document.createElement('option');
+                option.value = number;
+                option.textContent = number;
+                numberFilter.appendChild(option);
+            });
+        }
+
+        // Render cards based on data
+        function renderCards(data) {
+            const container = document.getElementById('cardsContainer');
+            container.innerHTML = '';
+            
+            if (data.length === 0) {
+                container.innerHTML = '<p style="text-align: center; grid-column: 1 / -1; padding: 2rem;">No items match your filters.</p>';
+                return;
+            }
+            
+            data.forEach(item => {
+                const card = document.createElement('div');
+                card.className = `card ${item.type}`;
+                card.dataset.id = item.id;
+                
+                // Show first 3 evidence items in the card
+                const previewEvidence = item.evidence.slice(0, 3);
+                
+                card.innerHTML = `
+                    <div class="card-header">
+                        ${item.title}
+                    </div>
+                    <div class="card-body">
+                        <div class="card-title">${item.description.substring(0, 150)}...</div>
+                        <div class="evidence-count">${item.evidence.length} pieces of evidence</div>
+                        <div class="evidence-list">
+                            ${previewEvidence.map(evidence => `
+                                <div class="evidence-item">
+                                    ${evidence.text}
+                                    <div class="source">${evidence.source}</div>
+                                </div>
+                            `).join('')}
+                        </div>
+                        <button class="view-all-btn" data-id="${item.id}">View All Evidence</button>
+                    </div>
+                `;
+                
+                container.appendChild(card);
+            });
+            
+            // Add event listeners to view buttons
+            document.querySelectorAll('.view-all-btn').forEach(button => {
+                button.addEventListener('click', function() {
+                    const itemId = this.dataset.id;
+                    showDetails(itemId);
+                });
+            });
+        }
+
+        // Show detailed view in modal
+        function showDetails(itemId) {
+            const item = triangulationData.find(i => i.id === itemId);
+            if (!item) return;
+            
+            const modal = document.getElementById('detailModal');
+            const modalTitle = document.getElementById('modalTitle');
+            const modalDescription = document.getElementById('modalDescription');
+            const modalEvidenceList = document.getElementById('modalEvidenceList');
+            
+            modalTitle.textContent = item.title;
+            modalDescription.innerHTML = `<p>${item.description}</p>`;
+            
+            modalEvidenceList.innerHTML = '';
+            item.evidence.forEach(evidence => {
+                const evidenceItem = document.createElement('div');
+                evidenceItem.className = 'modal-evidence-item';
+                evidenceItem.innerHTML = `
+                    <p>${evidence.text}</p>
+                    <div class="modal-source">${evidence.source}</div>
+                `;
+                modalEvidenceList.appendChild(evidenceItem);
+            });
+            
+            modal.style.display = 'block';
+        }
+
+        // Set up event listeners for filters and search
+        function setupEventListeners() {
+            const typeFilter = document.getElementById('typeFilter');
+            const numberFilter = document.getElementById('numberFilter');
+            const searchInput = document.getElementById('searchInput');
+            const closeModal = document.getElementById('closeModal');
+            const modal = document.getElementById('detailModal');
+            
+            // Filter change events
+            [typeFilter, numberFilter].forEach(filter => {
+                filter.addEventListener('change', applyFilters);
+            });
+            
+            // Search input event
+            searchInput.addEventListener('input', applyFilters);
+            
+            // Modal close events
+            closeModal.addEventListener('click', function() {
+                modal.style.display = 'none';
+            });
+            
+            window.addEventListener('click', function(event) {
+                if (event.target === modal) {
+                    modal.style.display = 'none';
+                }
+            });
+        }
+
+        // Apply all filters and search
+        function applyFilters() {
+            const typeValue = document.getElementById('typeFilter').value;
+            const numberValue = document.getElementById('numberFilter').value;
+            const searchValue = document.getElementById('searchInput').value.toLowerCase();
+            
+            let filteredData = triangulationData;
+            
+            // Filter by type
+            if (typeValue !== 'all') {
+                filteredData = filteredData.filter(item => item.type === typeValue);
+            }
+            
+            // Filter by number
+            if (numberValue !== 'all') {
+                filteredData = filteredData.filter(item => item.number == numberValue);
+            }
+            
+            // Filter by search
+            if (searchValue) {
+                filteredData = filteredData.filter(item => 
+                    item.description.toLowerCase().includes(searchValue) ||
+                    item.evidence.some(evidence => 
+                        evidence.text.toLowerCase().includes(searchValue)
+                    )
+                );
+            }
+            
+            renderCards(filteredData);
+        }
+    </script>
 </body>
 </html>
